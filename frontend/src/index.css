@@ -1,0 +1,7 @@
+/* Reset default Vite styles */
+body {
+  margin: 0;
+  display: block; /* Remove flex and place-items: center */
+  min-width: 0;
+  min-height: 0;
+}

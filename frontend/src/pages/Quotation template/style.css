@@ -1,0 +1,80 @@
+body{
+    background:#f2f2f2;
+    font-family: Arial, sans-serif;
+}
+@page{
+    size: A4;
+    margin: 15mm;
+}
+.Quotation{
+    height: 297mm;
+    width:210mm;
+    margin:40px auto;
+    background:white;
+    padding:40px 50px;
+   
+}
+.header{
+    display:flex;
+    justify-content:space-between;
+  
+}
+
+.logo img{
+    height: 120px;
+    width: 120px;
+}
+
+.invoice-title{
+    text-align:right;
+}
+
+.invoice-title h1{
+    color:#003366;
+}
+
+.client{
+    display: flex;
+    justify-content: space-between;
+}
+.details{
+  padding-top: 20px;
+}
+
+.name{
+    color:#003366;
+    font-weight:bold;
+}
+
+table{
+    width:100%;
+    margin-top:30px;
+    border-collapse:collapse;
+}
+
+ th{
+    background:#b9d2f3;
+    padding:10px;
+}
+td{
+    padding:10px;
+    border-bottom:1px solid #ddd;
+}
+.info{
+     margin-top: 30px;
+
+}
+.bank-detail{
+   margin-top: 30px;
+    display: flex;
+    justify-content: space-between;
+}
+.total h3{
+    color:#003366;
+}
+.footer{
+    margin-top:40px;
+    color:#003366;
+    font-size:20px;
+    font-weight:bold;
+}
