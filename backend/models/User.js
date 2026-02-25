@@ -23,7 +23,15 @@ const User = sequelize.define('User', {
     password: {
         type: DataTypes.STRING,
         allowNull: false,
-        defaultValue: 'password123' // Default password for new users
+        defaultValue: 'password123'
+    },
+    avatar: {
+        type: DataTypes.TEXT('long'),
+        allowNull: true
+    },
+    phone: {
+        type: DataTypes.STRING,
+        allowNull: true
     },
     roleId: {
         type: DataTypes.INTEGER,

@@ -13,7 +13,7 @@ const AllQuotations = () => {
 
   const fetchQuotations = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/quotations');
+      const response = await axios.get('/api/quotations');
       setQuotations(response.data);
       setLoading(false);
     } catch (error) {
@@ -25,7 +25,7 @@ const AllQuotations = () => {
   const deleteQuotation = async (id) => {
     if (window.confirm(`Are you sure you want to delete quotation ${id}?`)) {
       try {
-        await axios.delete(`http://localhost:3000/api/quotations/${id}`);
+        await axios.delete(`/api/quotations/${id}`);
         setQuotations(quotations.filter(q => q.id !== id));
       } catch (error) {
         console.error('Error deleting quotation:', error);
@@ -75,10 +75,18 @@ const AllQuotations = () => {
                         }`}>{q.status}</span>
                       </td>
                       <td>
-                        <button className="btn btn-sm btn-outline-info me-1"><i className="bi bi-eye"></i></button>
-                        <button className="btn btn-sm btn-outline-primary me-1"><i className="bi bi-pencil"></i></button>
-                        <button className="btn btn-sm btn-outline-danger me-1" onClick={() => deleteQuotation(q.id)}><i className="bi bi-trash"></i></button>
-                        <button className="btn btn-sm btn-outline-secondary"><i className="bi bi-download"></i></button>
+                        <button className="btn btn-sm btn-outline-info me-1" title="View Details" onClick={() => navigate(`/view-quotation/${q.id}`)}>
+                          <i className="bi bi-eye"></i>
+                        </button>
+                        <button className="btn btn-sm btn-outline-primary me-1" title="Edit" onClick={() => navigate(`/edit-quotation/${q.id}`)}>
+                          <i className="bi bi-pencil"></i>
+                        </button>
+                        <button className="btn btn-sm btn-outline-danger me-1" title="Delete" onClick={() => deleteQuotation(q.id)}>
+                          <i className="bi bi-trash"></i>
+                        </button>
+                        <button className="btn btn-sm btn-outline-secondary" title="Download PDF" onClick={() => navigate(`/view-quotation/${q.id}`)}>
+                          <i className="bi bi-download"></i>
+                        </button>
                       </td>
                     </tr>
                   ))

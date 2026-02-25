@@ -1,10 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [companyInfo, setCompanyInfo] = useState({
+    companyName: 'Loading...',
+    companyLogo: null
+  });
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchCompanySettings = async () => {
+      try {
+        const res = await axios.get('/api/company-settings');
+        if (res.data) {
+          setCompanyInfo({
+            companyName: res.data.companyName || 'Mindmanthan',
+            companyLogo: res.data.companyLogo
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching company settings:", error);
+      }
+    };
+    fetchCompanySettings();
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -20,7 +42,7 @@ const ForgotPassword = () => {
                     <div className="card shadow-lg p-4 border-0">
                         <div className="card-body">
                             <div className="text-center mb-4">
-                                <img src="/logo.svg" alt="Mindmanthan Logo" style={{ height: '50px' }} className="mb-3" />
+                                <img src={companyInfo.companyLogo || "/logo.svg"} alt={`${companyInfo.companyName} Logo`} style={{ height: '50px' }} className="mb-3" />
                                 <h3 className="fw-bold">Reset Password</h3>
                                 {!submitted ? (
                                     <p className="text-muted">Enter your email to receive a password reset link</p>

@@ -23,7 +23,7 @@ const Opportunities = () => {
 
   const fetchOpportunities = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/opportunities');
+      const response = await axios.get('/api/opportunities');
       setOpportunities(response.data);
       setLoading(false);
     } catch (error) {
@@ -35,7 +35,7 @@ const Opportunities = () => {
   const handleAddOpportunity = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3000/api/opportunities', newOpportunity);
+      const response = await axios.post('/api/opportunities', newOpportunity);
       setOpportunities([...opportunities, response.data]);
       setShowModal(false);
       setNewOpportunity({ name: '', client: '', stage: 'Discovery', value: '', closeDate: '' });
@@ -48,7 +48,7 @@ const Opportunities = () => {
   const deleteOpportunity = async (id) => {
       if (window.confirm('Are you sure you want to delete this opportunity?')) {
           try {
-              await axios.delete(`http://localhost:3000/api/opportunities/${id}`);
+              await axios.delete(`/api/opportunities/${id}`);
               setOpportunities(opportunities.filter(o => o.id !== id));
           } catch (err) { console.error('Error deleting opportunity:', err); }
       }

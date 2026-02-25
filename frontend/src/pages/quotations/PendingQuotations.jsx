@@ -45,7 +45,7 @@ const PendingQuotations = () => {
 
   const fetchQuotations = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/quotations');
+      const response = await axios.get('/api/quotations');
       setQuotations(response.data.filter(q => q.status === 'Pending'));
       setLoading(false);
     } catch (error) {
@@ -57,7 +57,7 @@ const PendingQuotations = () => {
   const updateStatus = async (id, newStatus) => {
     if (window.confirm(`Are you sure you want to ${newStatus.toLowerCase()} this quotation?`)) {
       try {
-        await axios.patch(`http://localhost:3000/api/quotations/${id}/status`, { status: newStatus });
+        await axios.patch(`/api/quotations/${id}/status`, { status: newStatus });
         setQuotations(quotations.filter(q => q.id !== id));
       } catch (error) {
         console.error(`Error updating status for quotation ${id}:`, error);
@@ -81,7 +81,7 @@ const PendingQuotations = () => {
     if (window.confirm(`Are you sure you want to approve ${selectedIds.length} selected quotations?`)) {
       try {
         await Promise.all(selectedIds.map(id => 
-          axios.patch(`http://localhost:3000/api/quotations/${id}/status`, { status: 'Approved' })
+          axios.patch(`/api/quotations/${id}/status`, { status: 'Approved' })
         ));
         setQuotations(quotations.filter(q => !selectedIds.includes(q.id)));
         setSelectedIds([]);

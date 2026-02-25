@@ -1,28 +1,28 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../database');
 
-const Lead = sequelize.define('Lead', {
-    name: {
+const Task = sequelize.define('Task', {
+    subject: {
         type: DataTypes.STRING,
         allowNull: false
     },
-    company: {
+    relatedTo: {
         type: DataTypes.STRING
     },
-    email: {
+    assignedTo: {
         type: DataTypes.STRING
     },
-    phone: {
-        type: DataTypes.STRING
+    dueDate: {
+        type: DataTypes.DATEONLY
     },
-    source: {
+    priority: {
         type: DataTypes.STRING,
-        defaultValue: 'Direct'
+        defaultValue: 'Normal'
     },
     status: {
         type: DataTypes.STRING,
-        defaultValue: 'New'
+        defaultValue: 'Pending'
     }
 });
 
-module.exports = Lead;
+module.exports = Task;

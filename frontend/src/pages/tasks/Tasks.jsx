@@ -15,26 +15,53 @@ const Tasks = () => {
   });
 
   useEffect(() => {
-    // Simulating fetching data
-    const mockTasks = [
-      { id: 1, subject: 'Follow up on Quotation Q-002', relatedTo: 'Beta Ltd', assignedTo: 'Jane Smith', dueDate: '2026-02-15', status: 'Pending', priority: 'High' },
-      { id: 2, subject: 'Prepare proposal for new lead', relatedTo: 'John Doe (Lead)', assignedTo: 'John Doe', dueDate: '2026-02-14', status: 'Overdue', priority: 'Medium' },
-      { id: 3, subject: 'Schedule kick-off meeting', relatedTo: 'Alpha Corp', assignedTo: 'Jane Smith', dueDate: '2026-02-12', status: 'Completed', priority: 'Low' }
-    ];
-    setTasks(mockTasks);
-    setLoading(false);
+    fetchTasks();
   }, []);
 
-  const handleCreateTask = (e) => {
-    e.preventDefault();
-    const id = tasks.length + 1;
-    setTasks([...tasks, { ...newTask, id }]);
-    setShowModal(false);
-    setNewTask({ subject: '', relatedTo: '', assignedTo: '', dueDate: '', priority: 'Normal', status: 'Pending' });
+  const fetchTasks = async () => {
+    try {
+      const response = await axios.get('/api/tasks');
+      setTasks(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+      setLoading(false);
+    }
   };
 
-  const toggleComplete = (id) => {
-    setTasks(tasks.map(t => t.id === id ? { ...t, status: t.status === 'Completed' ? 'Pending' : 'Completed' } : t));
+  const handleCreateTask = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('/api/tasks', newTask);
+      setTasks([...tasks, response.data]);
+      setShowModal(false);
+      setNewTask({ subject: '', relatedTo: '', assignedTo: '', dueDate: '', priority: 'Normal', status: 'Pending' });
+    } catch (error) {
+      console.error('Error creating task:', error);
+      alert('Failed to create task.');
+    }
+  };
+
+  const toggleComplete = async (id) => {
+    const task = tasks.find(t => t.id === id);
+    const newStatus = task.status === 'Completed' ? 'Pending' : 'Completed';
+    try {
+      await axios.patch(`/api/tasks/${id}`, { status: newStatus });
+      setTasks(tasks.map(t => t.id === id ? { ...t, status: newStatus } : t));
+    } catch (error) {
+      console.error('Error updating task status:', error);
+    }
+  };
+
+  const deleteTask = async (id) => {
+    if (window.confirm('Are you sure you want to delete this task?')) {
+      try {
+        await axios.delete(`/api/tasks/${id}`);
+        setTasks(tasks.filter(t => t.id !== id));
+      } catch (error) {
+        console.error('Error deleting task:', error);
+      }
+    }
   };
 
   const todayTasks = tasks.filter(t => t.status !== 'Completed').length;
@@ -123,7 +150,7 @@ const Tasks = () => {
                       >
                         <i className={`bi ${t.status === 'Completed' ? 'bi-check-all' : 'bi-check'}`}></i>
                       </button>
-                      <button className="btn btn-sm btn-outline-danger" title="Delete"><i className="bi bi-trash"></i></button>
+                      <button className="btn btn-sm btn-outline-danger" title="Delete" onClick={() => deleteTask(t.id)}><i className="bi bi-trash"></i></button>
                     </td>
                   </tr>
                 ))}

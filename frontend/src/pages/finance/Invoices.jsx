@@ -19,7 +19,7 @@ const Invoices = () => {
 
   const fetchInvoices = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/invoices');
+      const response = await axios.get('/api/invoices');
       setInvoices(response.data);
       setLoading(false);
     } catch (error) {
@@ -31,7 +31,7 @@ const Invoices = () => {
   const handleCreateInvoice = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3000/api/invoices', newInvoice);
+      const response = await axios.post('/api/invoices', newInvoice);
       setInvoices([...invoices, response.data]);
       setShowModal(false);
       setNewInvoice({ 
@@ -48,7 +48,7 @@ const Invoices = () => {
   const updatePaymentStatus = async (id, newStatus) => {
     try {
       // Assuming a patch route exists or using the same pattern as quotations
-      await axios.patch(`http://localhost:3000/api/invoices/${id}/status`, { status: newStatus });
+      await axios.patch(`/api/invoices/${id}/status`, { status: newStatus });
       setInvoices(invoices.map(inv => inv.id === id ? { ...inv, status: newStatus } : inv));
     } catch (error) {
       console.error('Error updating status:', error);
@@ -58,7 +58,7 @@ const Invoices = () => {
   const deleteInvoice = async (id) => {
     if (window.confirm(`Are you sure you want to delete invoice ${id}?`)) {
       try {
-        await axios.delete(`http://localhost:3000/api/invoices/${id}`);
+        await axios.delete(`/api/invoices/${id}`);
         setInvoices(invoices.filter(i => i.id !== id));
       } catch (error) {
         console.error('Error deleting invoice:', error);

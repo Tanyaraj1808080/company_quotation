@@ -1,8 +1,30 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import axios from 'axios';
 
 const ClientLogin = () => {
   const navigate = useNavigate();
+  const [companyInfo, setCompanyInfo] = useState({
+    companyName: 'Loading...',
+    companyLogo: null
+  });
+
+  useEffect(() => {
+    const fetchCompanySettings = async () => {
+      try {
+        const res = await axios.get('/api/company-settings');
+        if (res.data) {
+          setCompanyInfo({
+            companyName: res.data.companyName || 'Mindmanthan',
+            companyLogo: res.data.companyLogo
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching company settings:", error);
+      }
+    };
+    fetchCompanySettings();
+  }, []);
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -19,8 +41,8 @@ const ClientLogin = () => {
                     <div className="card shadow-lg p-4 border-0">
                         <div className="card-body">
                             <div className="text-center mb-4">
-                                <img src="/logo.svg" alt="Mindmanthan Logo" style={{ height: '50px' }} className="mb-3" />
-                                <h3 className="fw-bold">Client Portal Login</h3>
+                                <img src={companyInfo.companyLogo || "/logo.svg"} alt={`${companyInfo.companyName} Logo`} style={{ height: '50px' }} className="mb-3" />
+                                <h3 className="fw-bold">{companyInfo.companyName} Client Portal</h3>
                                 <p className="text-muted">Access your quotations and invoices</p>
                             </div>
                             <form onSubmit={handleLogin}>

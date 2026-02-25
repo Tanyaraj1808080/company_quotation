@@ -24,7 +24,7 @@ const FollowUps = () => {
 
   const fetchFollowups = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/followups');
+      const response = await axios.get('/api/followups');
       setFollowups(response.data);
       setLoading(false);
     } catch (error) {
@@ -36,7 +36,7 @@ const FollowUps = () => {
   const handleAddFollowup = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3000/api/followups', newFollowup);
+      const response = await axios.post('/api/followups', newFollowup);
       setFollowups([...followups, response.data]);
       setShowModal(false);
       setNewFollowup({ subject: '', client: '', dueDate: '', priority: 'Normal', method: 'Call', status: 'Pending' });
@@ -49,7 +49,7 @@ const FollowUps = () => {
   const deleteFollowup = async (id) => {
       if (window.confirm('Are you sure you want to delete this follow-up?')) {
           try {
-              await axios.delete(`http://localhost:3000/api/followups/${id}`);
+              await axios.delete(`/api/followups/${id}`);
               setFollowups(followups.filter(f => f.id !== id));
           } catch (err) { console.error('Error deleting follow-up:', err); }
       }

@@ -22,7 +22,7 @@ const RejectedQuotations = () => {
 
   const fetchQuotations = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/quotations');
+      const response = await axios.get('/api/quotations');
       setQuotations(response.data.filter(q => q.status === 'Rejected'));
       setLoading(false);
     } catch (error) {
@@ -34,7 +34,7 @@ const RejectedQuotations = () => {
   const deleteQuotation = async (id) => {
     if (window.confirm(`Are you sure you want to permanently delete quotation ${id}?`)) {
       try {
-        await axios.delete(`http://localhost:3000/api/quotations/${id}`);
+        await axios.delete(`/api/quotations/${id}`);
         setQuotations(quotations.filter(q => q.id !== id));
       } catch (error) {
         console.error('Error deleting quotation:', error);

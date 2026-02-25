@@ -22,7 +22,7 @@ const ApprovedQuotations = () => {
 
   const fetchQuotations = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/quotations');
+      const response = await axios.get('/api/quotations');
       setQuotations(response.data.filter(q => q.status === 'Approved'));
       setLoading(false);
     } catch (error) {
@@ -42,7 +42,7 @@ const ApprovedQuotations = () => {
           dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days later
           status: 'Pending'
         };
-        await axios.post('http://localhost:3000/api/invoices', invoiceData);
+        await axios.post('/api/invoices', invoiceData);
         alert(`Invoice generated successfully for ${quotation.clientName}!`);
       } catch (error) {
         console.error('Error generating invoice:', error);

@@ -14,13 +14,16 @@ const Followup = require('./models/Followup');
 const QuotationTemplate = require('./models/QuotationTemplate');
 const Role = require('./models/Role');
 const User = require('./models/User');
+const CompanySetting = require('./models/CompanySetting');
+const Task = require('./models/Task');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // --- API Endpoints ---
 
@@ -85,7 +88,8 @@ app.patch('/api/users/:id', async (req, res) => {
             res.status(404).json({ message: 'User not found' });
         }
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('Error in PATCH /api/users/:id:', error);
+        res.status(500).json({ message: error.message, stack: error.stack });
     }
 });
 
@@ -127,14 +131,34 @@ const seedData = async () => {
     }
 };
 
-// --- Server Start ---
-sequelize.sync().then(async () => {
-    await seedData();
-    app.listen(PORT, () => {
-        console.log(`Server is running on http://localhost:${PORT}`);
-    });
-}).catch(err => {
-    console.error('Unable to connect to the database:', err);
+// Company Settings
+app.get('/api/company-settings', async (req, res) => {
+    try {
+        let settings = await CompanySetting.findOne();
+        if (!settings) {
+            settings = await CompanySetting.create({});
+        }
+        res.json(settings);
+    } catch (error) {
+        console.error('Error in GET /api/company-settings:', error);
+        res.status(500).json({ message: error.message, stack: error.stack });
+    }
+});
+
+app.patch('/api/company-settings', async (req, res) => {
+    try {
+        let settings = await CompanySetting.findOne();
+        if (settings) {
+            await settings.update(req.body);
+            res.json(settings);
+        } else {
+            const newSettings = await CompanySetting.create(req.body);
+            res.json(newSettings);
+        }
+    } catch (error) {
+        console.error('Error in PATCH /api/company-settings:', error);
+        res.status(500).json({ message: error.message, stack: error.stack });
+    }
 });
 
 // Quotations
@@ -147,9 +171,28 @@ app.get('/api/quotations', async (req, res) => {
     }
 });
 
+app.get('/api/quotations/:id', async (req, res) => {
+    try {
+        const quotation = await Quotation.findByPk(req.params.id);
+        if (quotation) {
+            res.json(quotation);
+        } else {
+            res.status(404).json({ message: 'Quotation not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 app.post('/api/quotations', async (req, res) => {
     try {
-        const { clientName, totalValue, currency, items } = req.body;
+        console.log('Received Quotation Payload:', req.body);
+        const { clientName, totalValue, currency, items, dateCreated } = req.body;
+        
+        if (!clientName || totalValue === undefined) {
+            return res.status(400).json({ message: 'clientName and totalValue are required.' });
+        }
+
         const count = await Quotation.count();
         const id = `Q-${String(count + 1).padStart(3, '0')}`;
         const newQuotation = await Quotation.create({
@@ -158,9 +201,30 @@ app.post('/api/quotations', async (req, res) => {
             totalValue,
             currency,
             items,
+            dateCreated: dateCreated || new Date().toISOString().split('T')[0],
             status: 'Pending'
         });
+        console.log('Quotation created successfully:', newQuotation.id);
         res.status(201).json(newQuotation);
+    } catch (error) {
+        console.error('Error creating quotation:', error);
+        res.status(400).json({ 
+            message: error.message,
+            stack: error.stack,
+            errors: error.errors // Sequelize validation errors
+        });
+    }
+});
+
+app.patch('/api/quotations/:id', async (req, res) => {
+    try {
+        const quotation = await Quotation.findByPk(req.params.id);
+        if (quotation) {
+            await quotation.update(req.body);
+            res.json(quotation);
+        } else {
+            res.status(404).json({ message: 'Quotation not found' });
+        }
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -207,7 +271,8 @@ app.post('/api/clients', async (req, res) => {
         const newClient = await Client.create(req.body);
         res.status(201).json(newClient);
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        console.error('Error in POST /api/clients:', error);
+        res.status(500).json({ message: error.message, stack: error.stack });
     }
 });
 
@@ -320,7 +385,8 @@ app.post('/api/leads', async (req, res) => {
         const newLead = await Lead.create(req.body);
         res.status(201).json(newLead);
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        console.error('Error in POST /api/leads:', error);
+        res.status(500).json({ message: error.message, stack: error.stack });
     }
 });
 
@@ -349,7 +415,8 @@ app.post('/api/opportunities', async (req, res) => {
         const newOpportunity = await Opportunity.create(req.body);
         res.status(201).json(newOpportunity);
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        console.error('Error in POST /api/opportunities:', error);
+        res.status(500).json({ message: error.message, stack: error.stack });
     }
 });
 
@@ -387,6 +454,50 @@ app.delete('/api/followups/:id', async (req, res) => {
         const deleted = await Followup.destroy({ where: { id: req.params.id } });
         if (deleted) res.status(204).send();
         else res.status(404).json({ message: 'Followup not found' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Tasks
+app.get('/api/tasks', async (req, res) => {
+    try {
+        const tasks = await Task.findAll();
+        res.json(tasks);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+app.post('/api/tasks', async (req, res) => {
+    try {
+        const newTask = await Task.create(req.body);
+        res.status(201).json(newTask);
+    } catch (error) {
+        console.error('Error in POST /api/tasks:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
+app.patch('/api/tasks/:id', async (req, res) => {
+    try {
+        const task = await Task.findByPk(req.params.id);
+        if (task) {
+            await task.update(req.body);
+            res.json(task);
+        } else {
+            res.status(404).json({ message: 'Task not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+app.delete('/api/tasks/:id', async (req, res) => {
+    try {
+        const deleted = await Task.destroy({ where: { id: req.params.id } });
+        if (deleted) res.status(204).send();
+        else res.status(404).json({ message: 'Task not found' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -436,7 +547,8 @@ app.delete('/api/quotation-templates/:id', async (req, res) => {
 });
 
 // --- Server Start ---
-sequelize.sync().then(() => {
+sequelize.sync({ alter: true }).then(async () => {
+    await seedData();
     app.listen(PORT, () => {
         console.log(`Server is running on http://localhost:${PORT}`);
     });

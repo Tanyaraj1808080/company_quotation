@@ -4,6 +4,8 @@ import Layout from './components/common/Layout';
 import Dashboard from './pages/dashboard/Dashboard';
 import CreateQuotation from './pages/quotations/CreateQuotation';
 import AllQuotations from './pages/quotations/AllQuotations';
+import ViewQuotation from './pages/quotations/ViewQuotation';
+import EditQuotation from './pages/quotations/EditQuotation';
 import QuotationTemplates from './pages/quotations/QuotationTemplates';
 import PendingQuotations from './pages/quotations/PendingQuotations';
 import ApprovedQuotations from './pages/quotations/ApprovedQuotations';
@@ -56,6 +58,8 @@ function App() {
           <Route path="create-quotation" element={<CreateQuotation />} />
           <Route path="quotation-templates" element={<QuotationTemplates />} />
           <Route path="all-quotations" element={<AllQuotations />} />
+          <Route path="view-quotation/:id" element={<ViewQuotation />} />
+          <Route path="edit-quotation/:id" element={<EditQuotation />} />
           <Route path="pending-quotations" element={<PendingQuotations />} />
           <Route path="approved-quotations" element={<ApprovedQuotations />} />
           <Route path="rejected-quotations" element={<RejectedQuotations />} />

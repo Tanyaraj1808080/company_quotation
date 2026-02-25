@@ -1,0 +1,146 @@
+.quotation-container {
+    background: #f2f2f2;
+    font-family: Arial, sans-serif;
+    padding: 20px;
+}
+
+.quotation-page {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 20px auto;
+    background: white;
+    padding: 20mm;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    box-sizing: border-box;
+    position: relative;
+}
+
+.quotation-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+
+.quotation-logo img {
+    height: 100px;
+    width: auto;
+}
+
+.invoice-title {
+    text-align: right;
+}
+
+.invoice-title h1 {
+    color: #003366;
+    margin: 0;
+}
+
+.quotation-client {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+
+.client-details {
+    padding-top: 10px;
+}
+
+.client-name {
+    color: #003366;
+    font-weight: bold;
+}
+
+.quotation-table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+}
+
+.quotation-table th {
+    background: #b9d2f3;
+    padding: 12px 10px;
+    text-align: left;
+}
+
+.quotation-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.bottom-info {
+    margin-top: 30px;
+}
+
+.payment-section {
+    margin-bottom: 20px;
+}
+
+.payment-section h4 {
+    margin-bottom: 10px;
+}
+
+.info-text {
+    margin-top: 20px;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.bank-details-container {
+    margin-top: 30px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.terms-section {
+    flex: 1;
+    padding-right: 20px;
+}
+
+.total-section {
+    width: 250px;
+    text-align: right;
+}
+
+.total-section h3 {
+    color: #003366;
+    border-top: 2px solid #003366;
+    padding-top: 10px;
+}
+
+.quotation-footer {
+    margin-top: 40px;
+    color: #003366;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Print Specific Styles */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    .quotation-page, .quotation-page * {
+        visibility: visible;
+    }
+    .quotation-page {
+        position: absolute;
+        left: 0;
+        top: 0;
+        margin: 0;
+        padding: 15mm;
+        box-shadow: none;
+    }
+    .no-print {
+        display: none !important;
+    }
+}
+
+/* Editable specific */
+[contenteditable="true"]:hover {
+    background-color: #f8f9fa;
+    outline: 1px dashed #003366;
+}
+[contenteditable="true"]:focus {
+    background-color: #fff;
+    outline: 2px solid #003366;
+}

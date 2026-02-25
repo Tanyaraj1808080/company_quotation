@@ -1,17 +1,54 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import axios from 'axios';
 
 const Sidebar = () => {
   const location = useLocation();
+  const [companyInfo, setCompanyInfo] = useState({
+    companyName: 'Mindmanthan',
+    companyLogo: null
+  });
+  const [adminInfo, setAdminInfo] = useState({
+    name: 'Admin',
+    email: 'admin@example.com',
+    avatar: null
+  });
 
   const isActive = (path) => location.pathname === path ? 'active' : '';
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const companyRes = await axios.get('/api/company-settings');
+        if (companyRes.data) {
+          setCompanyInfo({
+            companyName: companyRes.data.companyName || 'Mindmanthan',
+            companyLogo: companyRes.data.companyLogo
+          });
+        }
+
+        const userRes = await axios.get('/api/users');
+        if (userRes.data && userRes.data.length > 0) {
+          setAdminInfo(userRes.data[0]);
+        }
+      } catch (error) {
+        console.error("Error fetching sidebar data:", error);
+      }
+    };
+    fetchData();
+  }, [location]);
 
   return (
     <nav id="sidebar" className="sidebar bg-light shadow-sm">
         <div className="sidebar-header d-flex align-items-center justify-content-center py-3">
             <Link to="/" className="logo text-decoration-none d-flex align-items-center">
-                <img src="/logo.svg" alt="Mindmanthan Logo" className="logo-img me-2" style={{height: '30px'}} />
-                <span className="fs-5 fw-bold text-dark">Mindmanthan</span>
+                <img 
+                  src={companyInfo.companyLogo || "/logo.svg"} 
+                  alt={`${companyInfo.companyName} Logo`} 
+                  className="logo-img me-2" 
+                  style={{height: '30px', width: 'auto', objectFit: 'contain'}} 
+                />
+                <span className="fs-5 fw-bold text-dark">{companyInfo.companyName}</span>
             </Link>
         </div>
 
@@ -123,7 +160,18 @@ const Sidebar = () => {
                 </a>
                 <ul className="collapse list-unstyled" id="systemSubmenu">
                     <li><Link to="/users-roles" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/users-roles')}`}><i className="bi bi-person-gear me-2"></i>Users & Roles</Link></li>
-                    <li><Link to="/settings" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/settings')}`}><i className="bi bi-gear me-2"></i>Settings</Link></li>
+                    
+                    <li>
+                        <a href="#settingsSubmenu" data-bs-toggle="collapse" aria-expanded="false" className="dropdown-toggle nav-link text-dark py-2 ps-3 d-flex align-items-center">
+                            <i className="bi bi-gear me-2"></i>
+                            Settings
+                        </a>
+                        <ul className="collapse list-unstyled" id="settingsSubmenu">
+                            <li><Link to="/settings?tab=profile" className={`nav-link text-dark py-2 ps-4 d-flex align-items-center ${isActive('/settings') && new URLSearchParams(window.location.search).get('tab') === 'profile' ? 'active' : ''}`}><i className="bi bi-person-badge me-2"></i>Profile</Link></li>
+                            <li><Link to="/settings?tab=branding" className={`nav-link text-dark py-2 ps-4 d-flex align-items-center ${isActive('/settings') && new URLSearchParams(window.location.search).get('tab') === 'branding' ? 'active' : ''}`}><i className="bi bi-building me-2"></i>Company Branding</Link></li>
+                        </ul>
+                    </li>
+
                     <li><Link to="/audit-logs" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/audit-logs')}`}><i className="bi bi-file-earmark-medical me-2"></i>Audit Logs</Link></li>
                     <li><Link to="/automation" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/automation')}`}><i className="bi bi-robot me-2"></i>Automation Rules</Link></li>
                     <li><Link to="/accounting-integration" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/accounting-integration')}`}><i className="bi bi-cash-coin me-2"></i>Accounting Integration</Link></li>
@@ -137,6 +185,24 @@ const Sidebar = () => {
                 </a>
             </li>
         </ul>
+
+        {/* ADMIN PROFILE FOOTER */}
+        <div className="sidebar-footer p-3 border-top bg-white mt-auto">
+            <div className="d-flex align-items-center">
+                <div className="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center overflow-hidden border me-2" 
+                     style={{width: '40px', height: '40px'}}>
+                    {adminInfo.avatar ? (
+                        <img src={adminInfo.avatar} alt="Admin" className="w-100 h-100 object-fit-cover" />
+                    ) : (
+                        <span className="fw-bold text-primary">{adminInfo.name?.charAt(0) || 'A'}</span>
+                    )}
+                </div>
+                <div className="overflow-hidden">
+                    <div className="fw-bold text-dark text-truncate small" style={{maxWidth: '120px'}}>{adminInfo.name}</div>
+                    <div className="text-muted small text-truncate" style={{maxWidth: '120px'}}>{adminInfo.email}</div>
+                </div>
+            </div>
+        </div>
     </nav>
   );
 };

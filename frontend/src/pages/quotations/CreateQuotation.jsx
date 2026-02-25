@@ -31,7 +31,7 @@ const CreateQuotation = () => {
           price: formData.itemPrice
         }]
       };
-      await axios.post('http://localhost:3000/api/quotations', payload);
+      await axios.post('/api/quotations', payload);
       alert('Quotation created successfully!');
       navigate('/all-quotations');
     } catch (error) {

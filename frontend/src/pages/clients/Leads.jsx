@@ -20,7 +20,7 @@ const Leads = () => {
 
   const fetchLeads = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/leads');
+      const response = await axios.get('/api/leads');
       setLeads(response.data);
       setLoading(false);
     } catch (error) {
@@ -32,7 +32,7 @@ const Leads = () => {
   const handleAddLead = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3000/api/leads', newLead);
+      const response = await axios.post('/api/leads', newLead);
       setLeads([...leads, response.data]);
       setShowModal(false);
       setNewLead({ name: '', company: '', email: '', phone: '', status: 'New', source: 'Direct' });
@@ -45,7 +45,7 @@ const Leads = () => {
   const deleteLead = async (id) => {
     if (window.confirm('Are you sure you want to delete this lead?')) {
       try {
-        await axios.delete(`http://localhost:3000/api/leads/${id}`);
+        await axios.delete(`/api/leads/${id}`);
         setLeads(leads.filter(l => l.id !== id));
       } catch (error) {
         console.error('Error deleting lead:', error);

@@ -18,7 +18,7 @@ const OpportunitiesPipeline = () => {
 
   const fetchOpportunities = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/opportunities');
+      const response = await axios.get('/api/opportunities');
       setOpportunities(response.data);
     } catch (error) {
       console.error('Error fetching opportunities:', error);
@@ -28,7 +28,7 @@ const OpportunitiesPipeline = () => {
   const handleAddOpportunity = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3000/api/opportunities', newOpportunity);
+      const response = await axios.post('/api/opportunities', newOpportunity);
       setOpportunities([...opportunities, response.data]);
       setShowModal(false);
       setNewOpportunity({ 
@@ -41,17 +41,38 @@ const OpportunitiesPipeline = () => {
     }
   };
 
+  const handleDeleteOpportunity = async (id) => {
+    if (window.confirm('Are you sure you want to delete this opportunity?')) {
+      try {
+        await axios.delete(`/api/opportunities/${id}`);
+        setOpportunities(opportunities.filter(o => o.id !== id));
+      } catch (error) {
+        console.error('Error deleting opportunity:', error);
+        alert('Failed to delete opportunity.');
+      }
+    }
+  };
+
   const getOpportunitiesByStage = (stage) => {
     return opportunities.filter(o => o.stage === stage);
   };
 
   const renderCard = (opp) => (
-    <div className="card mb-2" key={opp.id}>
+    <div className="card mb-2 shadow-sm border-0 kanban-card" key={opp.id}>
       <div className="card-body p-2">
-        <h6 className="card-title mb-1">{opp.name}</h6>
+        <div className="d-flex justify-content-between align-items-start mb-1">
+          <h6 className="card-title mb-0 fw-bold small">{opp.name}</h6>
+          <button 
+            className="btn btn-sm text-danger p-0" 
+            onClick={() => handleDeleteOpportunity(opp.id)}
+            title="Delete"
+          >
+            <i className="bi bi-trash fs-6"></i>
+          </button>
+        </div>
         <p className="card-text small text-muted mb-1">{opp.client}</p>
         <div className="d-flex justify-content-between align-items-center">
-          <span className="badge bg-secondary">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(opp.value || 0)}</span>
+          <span className="badge bg-light text-dark border">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(opp.value || 0)}</span>
         </div>
       </div>
     </div>
