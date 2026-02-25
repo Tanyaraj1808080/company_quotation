@@ -2,26 +2,41 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../database');
 
 const Lead = sequelize.define('Lead', {
-    name: {
+    clientName: {
         type: DataTypes.STRING,
         allowNull: false
     },
     company: {
         type: DataTypes.STRING
     },
-    email: {
+    roleProjectType: {
         type: DataTypes.STRING
     },
-    phone: {
+    contactLink: {
         type: DataTypes.STRING
     },
-    source: {
-        type: DataTypes.STRING,
-        defaultValue: 'Direct'
+    dateToConnect: {
+        type: DataTypes.DATEONLY
+    },
+    followupDate: {
+        type: DataTypes.DATEONLY
     },
     status: {
         type: DataTypes.STRING,
         defaultValue: 'New'
+    },
+    meetingDate: {
+        type: DataTypes.DATEONLY
+    },
+    dealValue: {
+        type: DataTypes.DECIMAL(10, 2)
+    },
+    notes: {
+        type: DataTypes.TEXT
+    },
+    customFields: {
+        type: DataTypes.JSON,
+        defaultValue: {}
     }
 });
 

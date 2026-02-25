@@ -18,7 +18,12 @@ const Role = sequelize.define('Role', {
     },
     permissions: {
         type: DataTypes.JSON, // Storing as JSON for flexibility
-        defaultValue: []
+        defaultValue: [],
+        get() {
+            const rawValue = this.getDataValue('permissions');
+            if (!rawValue) return [];
+            return typeof rawValue === 'string' ? JSON.parse(rawValue) : rawValue;
+        }
     }
 }, {
     timestamps: true

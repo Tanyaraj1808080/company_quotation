@@ -9,13 +9,12 @@ const Quotation = require('./models/Quotation');
 const Invoice = require('./models/Invoice');
 const Report = require('./models/Report');
 const Lead = require('./models/Lead');
-const Opportunity = require('./models/Opportunity');
-const Followup = require('./models/Followup');
-const QuotationTemplate = require('./models/QuotationTemplate');
-const Role = require('./models/Role');
-const User = require('./models/User');
-const CompanySetting = require('./models/CompanySetting');
-const Task = require('./models/Task');
+const LeadInteraction = require('./models/LeadInteraction');
+const LeadColumn = require('./models/LeadColumn');
+
+// Relationships
+Lead.hasMany(LeadInteraction, { as: 'interactions', foreignKey: 'leadId', onDelete: 'CASCADE' });
+LeadInteraction.belongsTo(Lead, { foreignKey: 'leadId' });
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -128,6 +127,15 @@ const seedData = async () => {
             });
             console.log('Admin user seeded.');
         }
+    }
+
+    const columnsCount = await LeadColumn.count();
+    if (columnsCount === 0) {
+        await LeadColumn.bulkCreate([
+            { name: 'Source', key: 'source', type: 'text' },
+            { name: 'Status', key: 'status', type: 'text' }
+        ]);
+        console.log('Lead columns seeded.');
     }
 };
 
@@ -370,10 +378,99 @@ app.delete('/api/reports/:id', async (req, res) => {
     }
 });
 
+// Leads Bulk Sync
+app.post('/api/leads/bulk-sync', async (req, res) => {
+    const transaction = await sequelize.transaction();
+    try {
+        const { leads } = req.body;
+        const results = [];
+
+        for (const leadData of leads) {
+            let lead;
+            const { interactions, isNew, id, ...data } = leadData;
+
+            // Sanitize dates and numbers
+            ['dateToConnect', 'followupDate', 'meetingDate', 'dealValue'].forEach(f => {
+                if (data[f] === '') data[f] = null;
+            });
+
+            if (isNew || !id) {
+                lead = await Lead.create(data, { transaction });
+            } else {
+                lead = await Lead.findByPk(id);
+                if (lead) await lead.update(data, { transaction });
+            }
+
+            if (lead && interactions) {
+                for (const intData of interactions) {
+                    if (!intData.summary) continue;
+                    const { isNewInteraction, id: intId, ...iData } = intData;
+                    iData.leadId = lead.id;
+
+                    ['followupDate', 'meetingDate', 'dealValue'].forEach(f => {
+                        if (iData[f] === '') iData[f] = null;
+                    });
+
+                    if (isNewInteraction || !intId) {
+                        await LeadInteraction.create(iData, { transaction });
+                    } else {
+                        const interaction = await LeadInteraction.findByPk(intId);
+                        if (interaction) await interaction.update(iData, { transaction });
+                    }
+                }
+            }
+            results.push(lead);
+        }
+
+        await transaction.commit();
+        res.json({ message: 'Bulk sync successful', count: results.length });
+    } catch (error) {
+        await transaction.rollback();
+        console.error('Bulk sync error:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Lead Interactions
+app.post('/api/lead-interactions', async (req, res) => {
+    try {
+        const interaction = await LeadInteraction.create(req.body);
+        res.status(201).json(interaction);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+app.patch('/api/lead-interactions/:id', async (req, res) => {
+    try {
+        const interaction = await LeadInteraction.findByPk(req.params.id);
+        if (interaction) {
+            await interaction.update(req.body);
+            res.json(interaction);
+        } else {
+            res.status(404).json({ message: 'Interaction not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+app.delete('/api/lead-interactions/:id', async (req, res) => {
+    try {
+        const deleted = await LeadInteraction.destroy({ where: { id: req.params.id } });
+        if (deleted) res.status(204).send();
+        else res.status(404).json({ message: 'Interaction not found' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // Leads
 app.get('/api/leads', async (req, res) => {
     try {
-        const leads = await Lead.findAll();
+        const leads = await Lead.findAll({
+            include: [{ model: LeadInteraction, as: 'interactions' }]
+        });
         res.json(leads);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -382,11 +479,12 @@ app.get('/api/leads', async (req, res) => {
 
 app.post('/api/leads', async (req, res) => {
     try {
+        console.log('Creating lead:', req.body);
         const newLead = await Lead.create(req.body);
         res.status(201).json(newLead);
     } catch (error) {
         console.error('Error in POST /api/leads:', error);
-        res.status(500).json({ message: error.message, stack: error.stack });
+        res.status(500).json({ message: error.message });
     }
 });
 
@@ -395,6 +493,51 @@ app.delete('/api/leads/:id', async (req, res) => {
         const deleted = await Lead.destroy({ where: { id: req.params.id } });
         if (deleted) res.status(204).send();
         else res.status(404).json({ message: 'Lead not found' });
+    } catch (error) {
+        console.error('Error in DELETE /api/leads:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
+app.patch('/api/leads/:id', async (req, res) => {
+    try {
+        const lead = await Lead.findByPk(req.params.id);
+        if (lead) {
+            await lead.update(req.body);
+            res.json(lead);
+        } else {
+            res.status(404).json({ message: 'Lead not found' });
+        }
+    } catch (error) {
+        console.error('Error in PATCH /api/leads:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Lead Columns
+app.get('/api/lead-columns', async (req, res) => {
+    try {
+        const columns = await LeadColumn.findAll();
+        res.json(columns);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+app.post('/api/lead-columns', async (req, res) => {
+    try {
+        const newColumn = await LeadColumn.create(req.body);
+        res.status(201).json(newColumn);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+});
+
+app.delete('/api/lead-columns/:id', async (req, res) => {
+    try {
+        const deleted = await LeadColumn.destroy({ where: { id: req.params.id } });
+        if (deleted) res.status(204).send();
+        else res.status(404).json({ message: 'Column not found' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

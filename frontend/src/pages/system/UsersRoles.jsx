@@ -227,13 +227,25 @@ const UsersRoles = () => {
                     <td className="text-muted small">{role.description}</td>
                     <td>
                       <div className="d-flex flex-wrap gap-1">
-                        {role.permissions?.length > 0 ? (
-                          role.permissions.includes('all') ? 
-                          <span className="badge bg-dark">All Access</span> :
-                          role.permissions.map(p => (
-                            <span key={p} className="badge bg-light text-dark border-0 small" style={{fontSize: '10px'}}>{p.replace('_', ' ').toUpperCase()}</span>
-                          ))
-                        ) : <span className="text-muted small italic">None</span>}
+                        {(() => {
+                          let perms = [];
+                          try {
+                            perms = typeof role.permissions === 'string' 
+                              ? JSON.parse(role.permissions) 
+                              : (role.permissions || []);
+                          } catch (e) {
+                            perms = [];
+                          }
+                          
+                          if (!Array.isArray(perms)) perms = [];
+
+                          if (perms.length === 0) return <span className="text-muted small italic">None</span>;
+                          if (perms.includes('all')) return <span className="badge bg-dark">All Access</span>;
+                          
+                          return perms.map(p => (
+                            <span key={p} className="badge bg-light text-dark border-0 small" style={{fontSize: '10px'}}>{String(p).replace('_', ' ').toUpperCase()}</span>
+                          ));
+                        })()}
                       </div>
                     </td>
                     <td className="text-end pe-4">

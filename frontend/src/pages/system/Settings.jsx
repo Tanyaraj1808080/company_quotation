@@ -79,19 +79,15 @@ const Settings = () => {
         return;
       }
 
-      // If it's a very large image, we warn the user but the server can now handle up to 50MB
-      if (file.size > 10 * 1024 * 1024) { 
-        showMessage('This image is very large. It might take a moment to upload.', 'warning');
-      }
-
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64String = reader.result;
         if (target === 'profile') {
-          setProfile({ ...profile, avatar: base64String });
+          setProfile(prev => ({ ...prev, avatar: base64String }));
         } else {
-          setCompany({ ...company, companyLogo: base64String });
+          setCompany(prev => ({ ...prev, companyLogo: base64String }));
         }
+        // No success message here, only when Save is clicked.
       };
       reader.onerror = () => {
         showMessage('Error reading file. Please try a different image.', 'danger');
@@ -102,31 +98,44 @@ const Settings = () => {
 
   const deleteImage = (target) => {
     if (target === 'profile') {
-      setProfile({ ...profile, avatar: null });
+      setProfile(prev => ({ ...prev, avatar: null }));
     } else {
-      setCompany({ ...company, companyLogo: null });
+      setCompany(prev => ({ ...prev, companyLogo: null }));
     }
-    // We don't call save here so the user can 'Cancel' by not clicking Save.
-    showMessage(`${target === 'profile' ? 'Profile picture' : 'Logo'} removed! Click 'Save' to confirm.`);
   };
 
   // Submit Handlers
   const handleProfileSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setLoading(true);
     try {
-      if (profile.id) {
-        await axios.patch(`/api/users/${profile.id}`, {
+      let targetId = profile.id;
+      
+      // If ID is missing, try to find the admin user first
+      if (!targetId) {
+        const userRes = await axios.get('/api/users');
+        const admin = userRes.data.find(u => u.email === profile.email) || userRes.data[0];
+        if (admin) {
+          targetId = admin.id;
+        }
+      }
+
+      if (targetId) {
+        await axios.patch(`/api/users/${targetId}`, {
           name: profile.name,
           email: profile.email,
           phone: profile.phone,
           avatar: profile.avatar
         });
         showMessage('Profile updated successfully!');
+        // Refresh data to ensure state is in sync
+        fetchData();
+      } else {
+        showMessage('Error: Admin user not found in database.', 'danger');
       }
     } catch (error) {
       console.error("Error updating profile:", error);
-      showMessage('Error updating profile', 'danger');
+      showMessage('Error updating profile: ' + (error.response?.data?.message || error.message), 'danger');
     } finally {
       setLoading(false);
     }
