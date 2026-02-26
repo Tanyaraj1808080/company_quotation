@@ -389,8 +389,14 @@ app.post('/api/leads/bulk-sync', async (req, res) => {
             let lead;
             const { interactions, isNew, id, ...data } = leadData;
 
-            // Sanitize dates and numbers
-            ['dateToConnect', 'followupDate', 'meetingDate', 'dealValue'].forEach(f => {
+            // Sanitize all main lead fields
+            const fieldsToSanitize = [
+              'dateToConnect', 'followupDate', 'meetingDate', 
+              'dealValue', 'clientName', 'company', 
+              'roleProjectType', 'contactLink', 'notes'
+            ];
+            
+            fieldsToSanitize.forEach(f => {
                 if (data[f] === '') data[f] = null;
             });
 
@@ -403,11 +409,15 @@ app.post('/api/leads/bulk-sync', async (req, res) => {
 
             if (lead && interactions) {
                 for (const intData of interactions) {
-                    if (!intData.summary) continue;
+                    // Only save interactions that have at least a summary or a date
+                    if (!intData.summary && !intData.date) continue;
+                    
                     const { isNewInteraction, id: intId, ...iData } = intData;
                     iData.leadId = lead.id;
 
-                    ['followupDate', 'meetingDate', 'dealValue'].forEach(f => {
+                    // Sanitize all interaction fields
+                    const intFieldsToSanitize = ['date', 'followupDate', 'meetingDate', 'dealValue', 'summary', 'status'];
+                    intFieldsToSanitize.forEach(f => {
                         if (iData[f] === '') iData[f] = null;
                     });
 
