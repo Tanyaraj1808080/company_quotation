@@ -1,179 +1,102 @@
 :root {
-    --sidebar-width: 250px;
-    --primary-blue: #0d6efd; /* Bootstrap primary blue */
-    --hover-bg: #e9ecef; /* Light gray for hover */
-    --active-bg: #e0f2fe; /* Lighter blue for active background */
-    --active-border: #0d6efd; /* Blue for active left border */
+    --sidebar-width: 260px;
+    --navbar-height: 60px;
+    --primary-blue: #0d6efd;
+    --active-bg: #f0f7ff;
 }
 
-/* New styles for collapsible headers */
-.collapsible-header {
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    /* Adjust padding to make space for the arrow */
-    padding-right: 15px; 
+body {
+    background-color: #f8f9fa;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
 }
 
-.collapsible-header .toggle-arrow {
-    transition: transform 0.3s ease;
-    font-size: 0.9rem; /* Adjust arrow size if needed */
-}
-
-.collapsible-header.open .toggle-arrow {
-    transform: rotate(90deg);
-}
-
+/* Sidebar Styling */
 .sidebar {
     min-width: var(--sidebar-width);
     max-width: var(--sidebar-width);
     background: #fff;
-    color: #333;
-    transition: all 0.3s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: fixed;
+    top: 0;
+    left: 0;
     height: 100vh;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
-    overflow-y: auto; /* Enable scrolling for long content */
-    z-index: 1000; /* Ensure sidebar is above other content */
+    z-index: 1050;
+    box-shadow: 0 0 15px rgba(0,0,0,0.05);
+    overflow-y: auto;
 }
 
-.sidebar.active {
-    margin-left: calc(var(--sidebar-width) * -1);
+.sidebar .nav-link {
+    transition: all 0.2s;
+    border-left: 3px solid transparent;
 }
 
-.sidebar-header {
-    padding: 20px 15px;
-    border-bottom: 1px solid #eee;
+.sidebar .nav-link:hover {
+    background-color: var(--active-bg);
+    color: var(--primary-blue) !important;
+}
+
+.sidebar .nav-link.active {
+    background-color: var(--active-bg);
+    color: var(--primary-blue) !important;
+    border-left-color: var(--primary-blue);
+    font-weight: 600;
+}
+
+.sidebar .dropdown-toggle::after {
+    margin-left: auto;
+}
+
+/* Main Content Area */
+.main-content {
+    width: 100%;
+    margin-left: 0;
+    min-height: 100vh;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Top Navbar */
+.top-navbar {
+    height: var(--navbar-height);
     background: #fff;
     position: sticky;
     top: 0;
-    z-index: 1;
+    z-index: 1000;
 }
 
-.sidebar-header .logo-img {
-    height: 30px;
-    width: auto;
-}
-
-.sidebar-header span {
-    color: #333;
-}
-
-.sidebar-heading {
-    font-size: 0.75rem;
-    color: #6c757d !important; /* Muted text */
-    padding: 0.75rem 1rem 0.5rem 1rem;
-    letter-spacing: 0.05em;
-    font-weight: bold;
-}
-
-.sidebar ul.components {
-    padding: 0;
-    margin-top: 0;
-}
-
-.sidebar ul li {
-    position: relative;
-}
-
-.sidebar ul li a {
-    padding: 10px 15px;
-    font-size: 1rem;
-    display: block;
-    color: #333;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    border-left: 4px solid transparent; /* Left indicator bar */
-}
-
-.sidebar ul li a i {
-    margin-right: 10px;
-    font-size: 1.1rem;
-    width: 20px; /* Fixed width for icons */
-    text-align: center;
-}
-
-.sidebar ul li a:hover {
-    color: var(--primary-blue);
-    background: var(--active-bg); /* Changed from var(--hover-bg) */
-    border-left-color: var(--active-border); /* Changed from transparent */
-}
-
-/* Active state for parent and child links */
-.sidebar ul li a.active {
-    color: var(--primary-blue);
-    background: var(--active-bg);
-    border-left-color: var(--active-border);
-    font-weight: 500;
-}
-
-/* Dropdown toggle arrow */
-.sidebar ul li a.dropdown-toggle {
-    position: relative;
-}
-
-.sidebar ul li a.dropdown-toggle::after {
-    display: block;
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    border: none;
-    font-family: 'bootstrap-icons';
-    content: "\F282"; /* Chevron right icon */
-    transition: all 0.3s ease;
-}
-
-.sidebar ul li a.dropdown-toggle[aria-expanded="true"]::after {
-    content: "\F286"; /* Chevron down icon */
-}
-
-/* Submenu styling */
-.sidebar ul ul a {
-    font-size: 0.95rem;
-    padding-top: 8px;
-    padding-bottom: 8px;
-    background: none; /* No background for sub-items by default */
-    border-left: none; /* No left border for sub-items by default */
-}
-
-.sidebar ul ul li {
-    padding-left: 0; /* Changed from 15px */
-}
-
-.sidebar ul ul li a.active {
-    background: var(--active-bg);
-    border-left-color: var(--active-border);
-}
-
-/* Main Content Adjustment */
-.main-content {
-    width: calc(100% - var(--sidebar-width));
-    margin-left: var(--sidebar-width);
-    transition: all 0.3s;
-    padding: 20px;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .sidebar {
-        margin-left: calc(var(--sidebar-width) * -1);
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 100vh;
-        z-index: 999;
-    }
-    .sidebar.active {
-        margin-left: 0;
-    }
+/* DESKTOP VIEW */
+@media (min-width: 768px) {
     .main-content {
-        width: 100%;
-        margin-left: 0;
-    }
-    .main-content.active {
         margin-left: var(--sidebar-width);
         width: calc(100% - var(--sidebar-width));
     }
 }
+
+/* MOBILE & TABLET VIEW */
+@media (max-width: 767.98px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    .sidebar.active {
+        transform: translateX(0);
+    }
+    .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+}
+
+/* Animations */
+.animate-fade-in {
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Utility */
+.cursor-pointer { cursor: pointer; }
+.btn-icon { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; padding: 0; }
+.table-responsive { border-radius: 8px; border: 1px solid #eee; margin-bottom: 1rem; }

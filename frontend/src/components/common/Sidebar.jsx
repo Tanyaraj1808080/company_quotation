@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const Sidebar = () => {
+const Sidebar = ({ isActive, toggleSidebar }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [companyInfo, setCompanyInfo] = useState({
@@ -15,7 +15,7 @@ const Sidebar = () => {
     avatar: null
   });
 
-  const isActive = (path) => location.pathname === path ? 'active' : '';
+  const isActiveLink = (path) => location.pathname === path ? 'active' : '';
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,38 +42,41 @@ const Sidebar = () => {
   const handleLogout = (e) => {
     e.preventDefault();
     if (window.confirm('Are you sure you want to logout?')) {
-      // Clear all storage
       localStorage.clear();
       sessionStorage.clear();
-      
-      // Optional: Clear specific cookies if they exist
-      // document.cookie.split(";").forEach((c) => {
-      //   document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-      // });
-
-      // Navigate to login page
       navigate('/client-login');
     }
   };
 
+  // Helper to close sidebar on link click (mobile only)
+  const handleLinkClick = () => {
+    if (window.innerWidth < 768) {
+      toggleSidebar();
+    }
+  };
+
   return (
-    <nav id="sidebar" className="sidebar bg-light shadow-sm">
-        <div className="sidebar-header d-flex align-items-center justify-content-center py-3">
-            <Link to="/" className="logo text-decoration-none d-flex align-items-center">
+    <nav id="sidebar" className={`sidebar bg-light shadow-sm ${isActive ? 'active' : ''}`}>
+        <div className="sidebar-header d-flex align-items-center justify-content-between py-3 px-3">
+            <Link to="/" className="logo text-decoration-none d-flex align-items-center" onClick={handleLinkClick}>
                 <img 
                   src={companyInfo.companyLogo || "/logo.svg"} 
                   alt={`${companyInfo.companyName} Logo`} 
                   className="logo-img me-2" 
                   style={{height: '30px', width: 'auto', objectFit: 'contain'}} 
                 />
-                <span className="fs-5 fw-bold text-dark">{companyInfo.companyName}</span>
+                <span className="fs-5 fw-bold text-dark text-truncate" style={{maxWidth: '150px'}}>{companyInfo.companyName}</span>
             </Link>
+            {/* Close Button for Mobile */}
+            <button className="btn btn-link text-dark p-0 d-md-none border-0" onClick={toggleSidebar}>
+                <i className="bi bi-x-lg fs-4"></i>
+            </button>
         </div>
 
         <ul className="list-unstyled components mb-0">
             {/* MENU Section */}
             <li>
-                <Link to="/" className={`nav-link text-dark py-2 px-3 d-flex align-items-center ${isActive('/')}`}>
+                <Link to="/" className={`nav-link text-dark py-2 px-3 d-flex align-items-center ${isActiveLink('/')}`} onClick={handleLinkClick}>
                     <i className="bi bi-grid me-2"></i>
                     Dashboard
                 </Link>
@@ -84,12 +87,12 @@ const Sidebar = () => {
                     Quotations
                 </a>
                 <ul className="collapse list-unstyled" id="quotationsSubmenu">
-                    <li><Link to="/create-quotation" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/create-quotation')}`}><i className="bi bi-plus-circle me-2"></i>Create Quotation</Link></li>
-                    <li><Link to="/quotation-templates" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/quotation-templates')}`}><i className="bi bi-file-earmark-richtext me-2"></i>Quotation Templates</Link></li>
-                    <li><Link to="/all-quotations" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/all-quotations')}`}><i className="bi bi-files me-2"></i>All Quotations</Link></li>
-                    <li><Link to="/pending-quotations" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/pending-quotations')}`}><i className="bi bi-hourglass-split me-2"></i>Pending Quotations</Link></li>
-                    <li><Link to="/approved-quotations" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/approved-quotations')}`}><i className="bi bi-check-circle me-2"></i>Approved Quotations</Link></li>
-                    <li><Link to="/rejected-quotations" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/rejected-quotations')}`}><i className="bi bi-x-circle me-2"></i>Rejected Quotations</Link></li>
+                    <li><Link to="/create-quotation" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/create-quotation')}`} onClick={handleLinkClick}><i className="bi bi-plus-circle me-2"></i>Create Quotation</Link></li>
+                    <li><Link to="/quotation-templates" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/quotation-templates')}`} onClick={handleLinkClick}><i className="bi bi-file-earmark-richtext me-2"></i>Quotation Templates</Link></li>
+                    <li><Link to="/all-quotations" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/all-quotations')}`} onClick={handleLinkClick}><i className="bi bi-files me-2"></i>All Quotations</Link></li>
+                    <li><Link to="/pending-quotations" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/pending-quotations')}`} onClick={handleLinkClick}><i className="bi bi-hourglass-split me-2"></i>Pending Quotations</Link></li>
+                    <li><Link to="/approved-quotations" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/approved-quotations')}`} onClick={handleLinkClick}><i className="bi bi-check-circle me-2"></i>Approved Quotations</Link></li>
+                    <li><Link to="/rejected-quotations" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/rejected-quotations')}`} onClick={handleLinkClick}><i className="bi bi-x-circle me-2"></i>Rejected Quotations</Link></li>
                 </ul>
             </li>
 
@@ -100,8 +103,8 @@ const Sidebar = () => {
                     Sales
                 </a>
                 <ul className="collapse list-unstyled" id="salesSubmenu">
-                    <li><Link to="/sales" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/sales')}`}><i className="bi bi-speedometer me-2"></i>Sales Dashboard</Link></li>
-                    <li><Link to="/sales-reports" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/sales-reports')}`}><i className="bi bi-bar-chart-line me-2"></i>Sales Reports</Link></li>
+                    <li><Link to="/sales" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/sales')}`} onClick={handleLinkClick}><i className="bi bi-speedometer me-2"></i>Sales Dashboard</Link></li>
+                    <li><Link to="/sales-reports" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/sales-reports')}`} onClick={handleLinkClick}><i className="bi bi-bar-chart-line me-2"></i>Sales Reports</Link></li>
                 </ul>
             </li>
 
@@ -112,18 +115,18 @@ const Sidebar = () => {
                     Clients
                 </a>
                 <ul className="collapse list-unstyled" id="clientsSubmenu">
-                    <li><Link to="/clients" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/clients')}`}><i className="bi bi-person-lines-fill me-2"></i>All Clients</Link></li>
-                    <li><Link to="/leads" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/leads')}`}><i className="bi bi-person-plus me-2"></i>Leads</Link></li>
-                    <li><Link to="/opportunities" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/opportunities')}`}><i className="bi bi-briefcase me-2"></i>Opportunities</Link></li>
-                    <li><Link to="/opportunities-pipeline" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/opportunities-pipeline')}`}><i className="bi bi-kanban me-2"></i>Opportunity Pipeline</Link></li>
-                    <li><Link to="/follow-ups" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/follow-ups')}`}><i className="bi bi-clock-history me-2"></i>Follow Ups</Link></li>
-                    <li><Link to="/tasks" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/tasks')}`}><i className="bi bi-card-checklist me-2"></i>Task Management</Link></li>
+                    <li><Link to="/clients" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/clients')}`} onClick={handleLinkClick}><i className="bi bi-person-lines-fill me-2"></i>All Clients</Link></li>
+                    <li><Link to="/leads" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/leads')}`} onClick={handleLinkClick}><i className="bi bi-person-plus me-2"></i>Leads</Link></li>
+                    <li><Link to="/opportunities" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/opportunities')}`} onClick={handleLinkClick}><i className="bi bi-briefcase me-2"></i>Opportunities</Link></li>
+                    <li><Link to="/opportunities-pipeline" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/opportunities-pipeline')}`} onClick={handleLinkClick}><i className="bi bi-kanban me-2"></i>Opportunity Pipeline</Link></li>
+                    <li><Link to="/follow-ups" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/follow-ups')}`} onClick={handleLinkClick}><i className="bi bi-clock-history me-2"></i>Follow Ups</Link></li>
+                    <li><Link to="/tasks" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/tasks')}`} onClick={handleLinkClick}><i className="bi bi-card-checklist me-2"></i>Task Management</Link></li>
                 </ul>
             </li>
 
             {/* CLIENT PORTAL Section */}
             <li>
-                <Link to="/client-login" className={`nav-link text-dark py-2 px-3 d-flex align-items-center ${isActive('/client-login')}`}>
+                <Link to="/client-login" className={`nav-link text-dark py-2 px-3 d-flex align-items-center ${isActiveLink('/client-login')}`} onClick={handleLinkClick}>
                     <i className="bi bi-box-arrow-in-right me-2"></i>
                     Client Login
                 </Link>
@@ -136,11 +139,11 @@ const Sidebar = () => {
                     Finance
                 </a>
                 <ul className="collapse list-unstyled" id="financeSubmenu">
-                    <li><Link to="/quotation-value-report" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/quotation-value-report')}`}><i className="bi bi-file-earmark-bar-graph me-2"></i>Quotation Value Report</Link></li>
-                    <li><Link to="/revenue-forecast" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/revenue-forecast')}`}><i className="bi bi-graph-up me-2"></i>Revenue Forecast</Link></li>
-                    <li><Link to="/discount-analysis" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/discount-analysis')}`}><i className="bi bi-percent me-2"></i>Discount Analysis</Link></li>
-                    <li><Link to="/invoices" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/invoices')}`}><i className="bi bi-receipt me-2"></i>Invoices</Link></li>
-                    <li><Link to="/payments" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/payments')}`}><i className="bi bi-cash-stack me-2"></i>Payments</Link></li>
+                    <li><Link to="/quotation-value-report" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/quotation-value-report')}`} onClick={handleLinkClick}><i className="bi bi-file-earmark-bar-graph me-2"></i>Quotation Value Report</Link></li>
+                    <li><Link to="/revenue-forecast" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/revenue-forecast')}`} onClick={handleLinkClick}><i className="bi bi-graph-up me-2"></i>Revenue Forecast</Link></li>
+                    <li><Link to="/discount-analysis" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/discount-analysis')}`} onClick={handleLinkClick}><i className="bi bi-percent me-2"></i>Discount Analysis</Link></li>
+                    <li><Link to="/invoices" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/invoices')}`} onClick={handleLinkClick}><i className="bi bi-receipt me-2"></i>Invoices</Link></li>
+                    <li><Link to="/payments" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/payments')}`} onClick={handleLinkClick}><i className="bi bi-cash-stack me-2"></i>Payments</Link></li>
                 </ul>
             </li>
 
@@ -151,10 +154,10 @@ const Sidebar = () => {
                     Reports & Analytics
                 </a>
                 <ul className="collapse list-unstyled" id="reportsSubmenu">
-                    <li><Link to="/monthly-quotation-report" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/monthly-quotation-report')}`}><i className="bi bi-file-earmark-bar-graph me-2"></i>Monthly Quotation Report</Link></li>
-                    <li><Link to="/conversion-rate" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/conversion-rate')}`}><i className="bi bi-speedometer me-2"></i>Conversion Rate</Link></li>
-                    <li><Link to="/sales-performance" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/sales-performance')}`}><i className="bi bi-graph-up-arrow me-2"></i>Sales Performance</Link></li>
-                    <li><Link to="/custom-reports" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/custom-reports')}`}><i className="bi bi-bar-chart-fill me-2"></i>Custom Reports</Link></li>
+                    <li><Link to="/monthly-quotation-report" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/monthly-quotation-report')}`} onClick={handleLinkClick}><i className="bi bi-file-earmark-bar-graph me-2"></i>Monthly Quotation Report</Link></li>
+                    <li><Link to="/conversion-rate" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/conversion-rate')}`} onClick={handleLinkClick}><i className="bi bi-speedometer me-2"></i>Conversion Rate</Link></li>
+                    <li><Link to="/sales-performance" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/sales-performance')}`} onClick={handleLinkClick}><i className="bi bi-graph-up-arrow me-2"></i>Sales Performance</Link></li>
+                    <li><Link to="/custom-reports" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/custom-reports')}`} onClick={handleLinkClick}><i className="bi bi-bar-chart-fill me-2"></i>Custom Reports</Link></li>
                 </ul>
             </li>
 
@@ -165,9 +168,9 @@ const Sidebar = () => {
                     Utilities
                 </a>
                 <ul className="collapse list-unstyled" id="utilitiesSubmenu">
-                    <li><Link to="/templates" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/templates')}`}><i className="bi bi-file-earmark-richtext me-2"></i>Templates</Link></li>
-                    <li><Link to="/taxes-charges" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/taxes-charges')}`}><i className="bi bi-calculator me-2"></i>Taxes & Charges</Link></li>
-                    <li><Link to="/terms-conditions" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/terms-conditions')}`}><i className="bi bi-journal-check me-2"></i>Terms & Conditions</Link></li>
+                    <li><Link to="/templates" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/templates')}`} onClick={handleLinkClick}><i className="bi bi-file-earmark-richtext me-2"></i>Templates</Link></li>
+                    <li><Link to="/taxes-charges" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/taxes-charges')}`} onClick={handleLinkClick}><i className="bi bi-calculator me-2"></i>Taxes & Charges</Link></li>
+                    <li><Link to="/terms-conditions" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/terms-conditions')}`} onClick={handleLinkClick}><i className="bi bi-journal-check me-2"></i>Terms & Conditions</Link></li>
                 </ul>
             </li>
 
@@ -178,7 +181,7 @@ const Sidebar = () => {
                     System
                 </a>
                 <ul className="collapse list-unstyled" id="systemSubmenu">
-                    <li><Link to="/users-roles" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/users-roles')}`}><i className="bi bi-person-gear me-2"></i>Users & Roles</Link></li>
+                    <li><Link to="/users-roles" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/users-roles')}`} onClick={handleLinkClick}><i className="bi bi-person-gear me-2"></i>Users & Roles</Link></li>
                     
                     <li>
                         <a href="#settingsSubmenu" data-bs-toggle="collapse" aria-expanded="false" className="dropdown-toggle nav-link text-dark py-2 ps-3 d-flex align-items-center">
@@ -186,14 +189,14 @@ const Sidebar = () => {
                             Settings
                         </a>
                         <ul className="collapse list-unstyled" id="settingsSubmenu">
-                            <li><Link to="/settings?tab=profile" className={`nav-link text-dark py-2 ps-4 d-flex align-items-center ${isActive('/settings') && new URLSearchParams(window.location.search).get('tab') === 'profile' ? 'active' : ''}`}><i className="bi bi-person-badge me-2"></i>Profile</Link></li>
-                            <li><Link to="/settings?tab=branding" className={`nav-link text-dark py-2 ps-4 d-flex align-items-center ${isActive('/settings') && new URLSearchParams(window.location.search).get('tab') === 'branding' ? 'active' : ''}`}><i className="bi bi-building me-2"></i>Company Branding</Link></li>
+                            <li><Link to="/settings?tab=profile" className={`nav-link text-dark py-2 ps-4 d-flex align-items-center ${isActiveLink('/settings') && new URLSearchParams(window.location.search).get('tab') === 'profile' ? 'active' : ''}`} onClick={handleLinkClick}><i className="bi bi-person-badge me-2"></i>Profile</Link></li>
+                            <li><Link to="/settings?tab=branding" className={`nav-link text-dark py-2 ps-4 d-flex align-items-center ${isActiveLink('/settings') && new URLSearchParams(window.location.search).get('tab') === 'branding' ? 'active' : ''}`} onClick={handleLinkClick}><i className="bi bi-building me-2"></i>Company Branding</Link></li>
                         </ul>
                     </li>
 
-                    <li><Link to="/audit-logs" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/audit-logs')}`}><i className="bi bi-file-earmark-medical me-2"></i>Audit Logs</Link></li>
-                    <li><Link to="/automation" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/automation')}`}><i className="bi bi-robot me-2"></i>Automation Rules</Link></li>
-                    <li><Link to="/accounting-integration" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/accounting-integration')}`}><i className="bi bi-cash-coin me-2"></i>Accounting Integration</Link></li>
+                    <li><Link to="/audit-logs" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/audit-logs')}`} onClick={handleLinkClick}><i className="bi bi-file-earmark-medical me-2"></i>Audit Logs</Link></li>
+                    <li><Link to="/automation" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/automation')}`} onClick={handleLinkClick}><i className="bi bi-robot me-2"></i>Automation Rules</Link></li>
+                    <li><Link to="/accounting-integration" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/accounting-integration')}`} onClick={handleLinkClick}><i className="bi bi-cash-coin me-2"></i>Accounting Integration</Link></li>
                 </ul>
             </li>
             

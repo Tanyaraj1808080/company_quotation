@@ -1,106 +1,53 @@
 import React from 'react';
 
-const Navbar = ({ title = "Quotation Dashboard" }) => {
+const Navbar = ({ title = "Quotation Dashboard", toggleSidebar }) => {
   return (
-    <header className="top-navbar">
+    <header className="top-navbar bg-white shadow-sm py-2 px-3 border-bottom d-flex align-items-center justify-content-between">
         <div className="d-flex align-items-center">
-            <h5 className="mb-0">{title}</h5>
+            {/* Hamburger Button for Mobile */}
+            <button 
+                className="btn btn-link text-dark p-0 me-3 d-md-none border-0 shadow-none" 
+                onClick={toggleSidebar}
+            >
+                <i className="bi bi-list fs-2"></i>
+            </button>
+            <h5 className="mb-0 fw-bold d-none d-sm-block">{title}</h5>
         </div>
-        <div className="d-flex align-items-center flex-grow-1 mx-4">
-            <div className="dropdown w-100">
-                <div className="input-group" id="globalSearchInput" data-bs-toggle="dropdown" aria-expanded="false"
+
+        <div className="d-flex align-items-center flex-grow-1 mx-2 mx-md-4">
+            <div className="dropdown w-100" style={{maxWidth: '400px'}}>
+                <div className="input-group input-group-sm" id="globalSearchInput" data-bs-toggle="dropdown" aria-expanded="false"
                     data-bs-auto-close="outside">
-                    <input type="text" className="form-control" placeholder="Search across modules..."
+                    <input type="text" className="form-control bg-light border-0 shadow-none px-3 rounded-pill-start" placeholder="Search..."
                         aria-label="Global Search" />
-                    <button className="btn btn-outline-secondary" type="button"><i
-                            className="bi bi-search"></i></button>
+                    <button className="btn btn-light border-0 rounded-pill-end" type="button">
+                        <i className="bi bi-search text-muted"></i>
+                    </button>
                 </div>
-                <ul className="dropdown-menu" aria-labelledby="globalSearchInput">
+                <ul className="dropdown-menu shadow border-0 mt-2" aria-labelledby="globalSearchInput">
                     <li className="dropdown-header">Recent Searches</li>
-                    <li><a className="dropdown-item" href="#"><i className="bi bi-file-earmark-text me-2"></i> Quotation
-                            Q-001 (Alpha Corp)</a></li>
-                    <li><a className="dropdown-item" href="#"><i className="bi bi-person-lines-fill me-2"></i> Client:
-                            Tech Innovations Inc.</a></li>
-                    <li><a className="dropdown-item" href="#"><i className="bi bi-person-plus me-2"></i> Lead: John
-                            Doe</a></li>
-                    <li>
-                        <hr className="dropdown-divider" />
-                    </li>
-                    <li className="dropdown-header">Search Results (Mock)</li>
-                    <li><a className="dropdown-item" href="#"><i className="bi bi-file-earmark-text me-2"></i> Q-002:
-                            Beta Ltd. - Pending</a></li>
-                    <li><a className="dropdown-item" href="#"><i className="bi bi-briefcase me-2"></i> Opportunity:
-                            Mobile App Dev.</a></li>
-                    <li><a className="dropdown-item" href="#"><i className="bi bi-person-lines-fill me-2"></i> Client:
-                            Global Solutions Ltd.</a></li>
-                    <li>
-                        <hr className="dropdown-divider" />
-                    </li>
-                    <li><a className="dropdown-item text-center" href="#">View All Results</a></li>
+                    <li><a className="dropdown-item py-2" href="#"><i className="bi bi-file-earmark-text me-2"></i> Q-001 (Alpha Corp)</a></li>
+                    <li><a className="dropdown-item py-2" href="#"><i className="bi bi-person-lines-fill me-2"></i> Client: Tech Innovations</a></li>
+                    <li><hr className="dropdown-divider" /></li>
+                    <li><a className="dropdown-item text-center small text-primary fw-bold" href="#">View All Results</a></li>
                 </ul>
             </div>
+        </div>
+
+        <div className="d-flex align-items-center gap-2 gap-md-3">
             <div className="dropdown">
-                <a href="#" className="nav-link me-3 position-relative" id="notificationDropdown"
+                <a href="#" className="nav-link p-1 position-relative" id="notificationDropdown"
                     data-bs-toggle="dropdown" aria-expanded="false">
-                    <i className="bi bi-bell-fill fs-5"></i>
-                    <span
-                        className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                        style={{fontSize: '0.6em'}}>
-                        3
-                        <span className="visually-hidden">unread notifications</span>
-                    </span>
+                    <i className="bi bi-bell fs-5"></i>
+                    <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style={{fontSize: '0.55em'}}>3</span>
                 </a>
-                <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown">
-                    <li className="dropdown-header">You have 3 new notifications</li>
-                    <li>
-                        <hr className="dropdown-divider" />
-                    </li>
-                    <li>
-                        <a className="dropdown-item d-flex align-items-center" href="#">
-                            <i className="bi bi-check-circle-fill text-success me-2"></i>
-                            <div>
-                                <p className="mb-0">Quotation Q-001 Approved</p>
-                                <small className="text-muted">15 minutes ago</small>
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <hr className="dropdown-divider" />
-                    </li>
-                    <li>
-                        <a className="dropdown-item d-flex align-items-center" href="#">
-                            <i className="bi bi-person-plus-fill text-primary me-2"></i>
-                            <div>
-                                <p className="mb-0">New Lead Assigned</p>
-                                <small className="text-muted">1 hour ago</small>
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <hr className="dropdown-divider" />
-                    </li>
-                    <li>
-                        <a className="dropdown-item d-flex align-items-center" href="#">
-                            <i className="bi bi-exclamation-triangle-fill text-warning me-2"></i>
-                            <div>
-                                <p className="mb-0">Task "Prepare Proposal" is overdue</p>
-                                <small className="text-muted">3 hours ago</small>
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <hr className="dropdown-divider" />
-                    </li>
-                    <li><a className="dropdown-item text-center" href="#">View all notifications</a></li>
+                <ul className="dropdown-menu dropdown-menu-end shadow border-0 mt-2" aria-labelledby="notificationDropdown">
+                    <li className="dropdown-header fw-bold">Notifications</li>
+                    <li><a className="dropdown-item small" href="#">Quotation Q-001 Approved</a></li>
                 </ul>
             </div>
-            <a href="#" className="nav-link me-3"><i className="bi bi-gear-fill"></i></a>
-            <a href="#" className="nav-link">
-                <img src="https://i.pravatar.cc/40" alt="User" className="rounded-circle" />
-            </a>
-            <a href="#" className="nav-link ms-3" id="navbar-logout-link">
-                <i className="bi bi-box-arrow-right"></i>
-            </a>
+            <a href="#" className="nav-link p-1 d-none d-md-block"><i className="bi bi-gear fs-5"></i></a>
+            <img src="https://i.pravatar.cc/32" alt="User" className="rounded-circle border" style={{width: '32px', height: '32px'}} />
         </div>
     </header>
   );
