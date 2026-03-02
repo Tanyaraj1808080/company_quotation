@@ -12,7 +12,26 @@ const ViewQuotation = () => {
     const fetchQuotation = async () => {
       try {
         const response = await axios.get(`/api/quotations/${id}`);
-        setQuotation(response.data);
+        let data = response.data;
+        
+        // Robust JSON parsing and array verification
+        if (data) {
+          if (typeof data.items === 'string') {
+            try {
+              data.items = JSON.parse(data.items);
+            } catch (e) {
+              console.error("Failed to parse items string:", e);
+              data.items = [];
+            }
+          }
+          
+          // Final check: if it's still not an array, force it to be one
+          if (!Array.isArray(data.items)) {
+            data.items = [];
+          }
+        }
+        
+        setQuotation(data);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching quotation:', error);

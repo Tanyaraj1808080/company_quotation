@@ -241,7 +241,7 @@ const QuotationTemplates = () => {
               <img 
                 src={templateData.logo || companyLogo} 
                 alt="company logo" 
-                style={{ maxHeight: '100px', maxWidth: '300px', width: 'auto', height: 'auto', objectFit: 'contain' }} 
+                style={{  width: '140px', height: '140px', objectFit: 'contain' }} 
               />
               
               <div className="no-print logo-controls position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-25 opacity-0 hover-opacity-100 transition-opacity">

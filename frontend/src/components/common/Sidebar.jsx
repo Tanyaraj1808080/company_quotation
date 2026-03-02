@@ -87,8 +87,7 @@ const Sidebar = ({ isActive, toggleSidebar }) => {
                     Quotations
                 </a>
                 <ul className="collapse list-unstyled" id="quotationsSubmenu">
-                    <li><Link to="/create-quotation" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/create-quotation')}`} onClick={handleLinkClick}><i className="bi bi-plus-circle me-2"></i>Create Quotation</Link></li>
-                    <li><Link to="/quotation-templates" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/quotation-templates')}`} onClick={handleLinkClick}><i className="bi bi-file-earmark-richtext me-2"></i>Quotation Templates</Link></li>
+                    <li><Link to="/quotation-templates" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/quotation-templates')}`} onClick={handleLinkClick}><i className="bi bi-file-earmark-richtext me-2"></i>Create Quotation</Link></li>
                     <li><Link to="/all-quotations" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/all-quotations')}`} onClick={handleLinkClick}><i className="bi bi-files me-2"></i>All Quotations</Link></li>
                     <li><Link to="/pending-quotations" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/pending-quotations')}`} onClick={handleLinkClick}><i className="bi bi-hourglass-split me-2"></i>Pending Quotations</Link></li>
                     <li><Link to="/approved-quotations" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActiveLink('/approved-quotations')}`} onClick={handleLinkClick}><i className="bi bi-check-circle me-2"></i>Approved Quotations</Link></li>

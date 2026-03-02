@@ -18,7 +18,7 @@ const Layout = () => {
       <main className={`main-content ${isSidebarActive ? 'active' : ''}`}>
         {/* Passing toggle to Navbar for the hamburger button */}
         <Navbar toggleSidebar={toggleSidebar} />
-        <div className="container-fluid">
+        <div className="container-fluid px-0">
           <Outlet />
         </div>
       </main>
