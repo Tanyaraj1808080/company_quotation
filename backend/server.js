@@ -11,10 +11,25 @@ const Report = require('./models/Report');
 const Lead = require('./models/Lead');
 const LeadInteraction = require('./models/LeadInteraction');
 const LeadColumn = require('./models/LeadColumn');
+const Followup = require('./models/Followup');
+const Role = require('./models/Role');
+const User = require('./models/User');
+const CompanySetting = require('./models/CompanySetting');
+const Opportunity = require('./models/Opportunity');
+const Task = require('./models/Task');
+const QuotationTemplate = require('./models/QuotationTemplate');
+const Payment = require('./models/Payment');
+const AutomationRule = require('./models/AutomationRule');
 
 // Relationships
 Lead.hasMany(LeadInteraction, { as: 'interactions', foreignKey: 'leadId', onDelete: 'CASCADE' });
 LeadInteraction.belongsTo(Lead, { foreignKey: 'leadId' });
+
+Invoice.hasMany(Payment, { foreignKey: 'invoiceId', onDelete: 'CASCADE' });
+Payment.belongsTo(Invoice, { foreignKey: 'invoiceId' });
+
+// Ensure other relationships are managed if they aren't in the model files
+// User and Role relationships are already in User.js, but let's re-verify if needed.
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -40,6 +55,20 @@ app.post('/api/roles', async (req, res) => {
     try {
         const newRole = await Role.create(req.body);
         res.status(201).json(newRole);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+});
+
+app.patch('/api/roles/:id', async (req, res) => {
+    try {
+        const role = await Role.findByPk(req.params.id);
+        if (role) {
+            await role.update(req.body);
+            res.json(role);
+        } else {
+            res.status(404).json({ message: 'Role not found' });
+        }
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -694,6 +723,95 @@ app.delete('/api/quotation-templates/:id', async (req, res) => {
         const deleted = await QuotationTemplate.destroy({ where: { id: req.params.id } });
         if (deleted) res.status(204).send();
         else res.status(404).json({ message: 'Template not found' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Payments
+app.get('/api/payments', async (req, res) => {
+    try {
+        const payments = await Payment.findAll({ include: Invoice });
+        res.json(payments);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+app.post('/api/payments', async (req, res) => {
+    const transaction = await sequelize.transaction();
+    try {
+        const { invoiceId, amount, paymentDate, paymentMethod, transactionId, notes } = req.body;
+        
+        const invoice = await Invoice.findByPk(invoiceId);
+        if (!invoice) {
+            throw new Error('Invoice not found');
+        }
+
+        const newPayment = await Payment.create({
+            invoiceId, amount, paymentDate, paymentMethod, transactionId, notes
+        }, { transaction });
+
+        // Update invoice amountPaid and status
+        const totalPaid = (invoice.amountPaid || 0) + parseFloat(amount);
+        let status = 'Partial';
+        if (totalPaid >= invoice.amount) {
+            status = 'Paid';
+        }
+        
+        await invoice.update({ 
+            amountPaid: totalPaid,
+            status: status
+        }, { transaction });
+
+        await transaction.commit();
+        
+        const paymentWithInvoice = await Payment.findByPk(newPayment.id, { include: Invoice });
+        res.status(201).json(paymentWithInvoice);
+    } catch (error) {
+        await transaction.rollback();
+        res.status(400).json({ message: error.message });
+    }
+});
+
+// Automation Rules
+app.get('/api/automation-rules', async (req, res) => {
+    try {
+        const rules = await AutomationRule.findAll();
+        res.json(rules);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+app.post('/api/automation-rules', async (req, res) => {
+    try {
+        const newRule = await AutomationRule.create(req.body);
+        res.status(201).json(newRule);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+});
+
+app.patch('/api/automation-rules/:id', async (req, res) => {
+    try {
+        const rule = await AutomationRule.findByPk(req.params.id);
+        if (rule) {
+            await rule.update(req.body);
+            res.json(rule);
+        } else {
+            res.status(404).json({ message: 'Rule not found' });
+        }
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+});
+
+app.delete('/api/automation-rules/:id', async (req, res) => {
+    try {
+        const deleted = await AutomationRule.destroy({ where: { id: req.params.id } });
+        if (deleted) res.status(204).send();
+        else res.status(404).json({ message: 'Rule not found' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

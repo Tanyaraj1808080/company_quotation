@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import '../../assets/styles/quotation-template.css';
+import mindManthanLogo from '../../MIND MANTHAN LOGO2.svg 2 .svg';
 
 const QuotationTemplates = () => {
   const [templates, setTemplates] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showEditor, setShowEditor] = useState(false);
   const [currentTemplate, setCurrentTemplate] = useState(null);
+  const logoInputRef = useRef(null);
   
   // Template State (Editable Fields)
   const [templateData, setTemplateData] = useState({
@@ -17,6 +19,7 @@ const QuotationTemplates = () => {
     quoteNo: '#212182818',
     dueDate: '2023-05-05',
     quoteDate: '2023-05-02',
+    logo: null, // Custom logo for this template
     items: [
       { id: 1, quantity: 1, description: '[WEBSITE]', price: 25.00, amount: 50.00 },
       { id: 2, quantity: 2, description: '[APP IOS]', price: 10.00, amount: 30.00 },
@@ -54,12 +57,42 @@ const QuotationTemplates = () => {
 
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState(null); // 'success', 'error'
+  const [companyLogo, setCompanyLogo] = useState(mindManthanLogo);
 
   const API_URL = '/api/quotation-templates';
 
   useEffect(() => {
     fetchTemplates();
+    fetchCompanyLogo();
   }, []);
+
+  const fetchCompanyLogo = async () => {
+    try {
+      const response = await axios.get('/api/company-settings');
+      if (response.data && response.data.companyLogo) {
+        setCompanyLogo(response.data.companyLogo);
+      }
+    } catch (error) {
+      console.error('Error fetching company logo:', error);
+    }
+  };
+
+  const handleLogoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setTemplateData(prev => ({ ...prev, logo: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const deleteTemplateLogo = () => {
+    if (window.confirm('Remove this custom logo and use company default?')) {
+      setTemplateData(prev => ({ ...prev, logo: null }));
+    }
+  };
 
   const fetchTemplates = async () => {
     setIsLoading(true);
@@ -197,8 +230,32 @@ const QuotationTemplates = () => {
         {/* Actual Template Design */}
         <div className="quotation-page" id="quotation-template">
           <div className="quotation-header">
-            <div className="quotation-logo">
-              <img src="/logo-template.svg" alt="company logo" />
+            <div className="quotation-logo position-relative group">
+              <input 
+                type="file" 
+                ref={logoInputRef} 
+                className="d-none" 
+                accept="image/*" 
+                onChange={handleLogoUpload} 
+              />
+              <img 
+                src={templateData.logo || companyLogo} 
+                alt="company logo" 
+                style={{ maxHeight: '100px', maxWidth: '300px', width: 'auto', height: 'auto', objectFit: 'contain' }} 
+              />
+              
+              <div className="no-print logo-controls position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-25 opacity-0 hover-opacity-100 transition-opacity">
+                <div className="d-flex gap-2">
+                  <button className="btn btn-sm btn-light rounded-circle shadow-sm" onClick={() => logoInputRef.current.click()} title="Change Logo">
+                    <i className="bi bi-pencil-fill"></i>
+                  </button>
+                  {templateData.logo && (
+                    <button className="btn btn-sm btn-danger rounded-circle shadow-sm" onClick={deleteTemplateLogo} title="Remove Custom Logo">
+                      <i className="bi bi-trash3-fill"></i>
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
             <div className="invoice-title">
               <h1 contentEditable suppressContentEditableWarning>QUOTATION</h1>

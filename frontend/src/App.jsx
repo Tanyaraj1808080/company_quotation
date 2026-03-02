@@ -11,6 +11,7 @@ import PendingQuotations from './pages/quotations/PendingQuotations';
 import ApprovedQuotations from './pages/quotations/ApprovedQuotations';
 import Clients from './pages/clients/Clients';
 import Invoices from './pages/finance/Invoices';
+import Payments from './pages/finance/Payments';
 import RevenueForecast from './pages/finance/RevenueForecast';
 import DiscountAnalysis from './pages/finance/DiscountAnalysis';
 import Leads from './pages/clients/Leads';
@@ -71,6 +72,7 @@ function App() {
           <Route path="revenue-forecast" element={<RevenueForecast />} />
           <Route path="discount-analysis" element={<DiscountAnalysis />} />
           <Route path="invoices" element={<Invoices />} />
+          <Route path="payments" element={<Payments />} />
           <Route path="tasks" element={<Tasks />} />
 
           {/* Sales Routes */}

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const Sidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [companyInfo, setCompanyInfo] = useState({
     companyName: 'Mindmanthan',
     companyLogo: null
@@ -37,6 +38,23 @@ const Sidebar = () => {
     };
     fetchData();
   }, [location]);
+
+  const handleLogout = (e) => {
+    e.preventDefault();
+    if (window.confirm('Are you sure you want to logout?')) {
+      // Clear all storage
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Optional: Clear specific cookies if they exist
+      // document.cookie.split(";").forEach((c) => {
+      //   document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      // });
+
+      // Navigate to login page
+      navigate('/client-login');
+    }
+  };
 
   return (
     <nav id="sidebar" className="sidebar bg-light shadow-sm">
@@ -122,6 +140,7 @@ const Sidebar = () => {
                     <li><Link to="/revenue-forecast" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/revenue-forecast')}`}><i className="bi bi-graph-up me-2"></i>Revenue Forecast</Link></li>
                     <li><Link to="/discount-analysis" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/discount-analysis')}`}><i className="bi bi-percent me-2"></i>Discount Analysis</Link></li>
                     <li><Link to="/invoices" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/invoices')}`}><i className="bi bi-receipt me-2"></i>Invoices</Link></li>
+                    <li><Link to="/payments" className={`nav-link text-dark py-2 ps-3 d-flex align-items-center ${isActive('/payments')}`}><i className="bi bi-cash-stack me-2"></i>Payments</Link></li>
                 </ul>
             </li>
 
@@ -178,8 +197,8 @@ const Sidebar = () => {
                 </ul>
             </li>
             
-            <li>
-                <a href="#" className="nav-link text-dark py-2 px-3 d-flex align-items-center" onClick={(e) => { e.preventDefault(); alert('Logout'); }}>
+            <li className="mt-2 border-top">
+                <a href="#" className="nav-link text-danger py-2 px-3 d-flex align-items-center fw-bold" onClick={handleLogout}>
                     <i className="bi bi-box-arrow-right me-2"></i>
                     Logout
                 </a>

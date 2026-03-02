@@ -18,6 +18,51 @@ const CompanySetting = sequelize.define('CompanySetting', {
     companyLogo: {
         type: DataTypes.TEXT('long'), // Base64 or URL
         allowNull: true
+    },
+    primaryColor: {
+        type: DataTypes.STRING,
+        defaultValue: '#0d6efd'
+    },
+    secondaryColor: {
+        type: DataTypes.STRING,
+        defaultValue: '#6c757d'
+    },
+    // General Settings
+    timezone: {
+        type: DataTypes.STRING,
+        defaultValue: 'IST'
+    },
+    currencySymbol: {
+        type: DataTypes.STRING,
+        defaultValue: 'INR'
+    },
+    dateFormat: {
+        type: DataTypes.STRING,
+        defaultValue: 'DD/MM/YYYY'
+    },
+    timeFormat: {
+        type: DataTypes.STRING,
+        defaultValue: '12-hour'
+    },
+    weekStartsOn: {
+        type: DataTypes.STRING,
+        defaultValue: 'Monday'
+    },
+    currencyPosition: {
+        type: DataTypes.STRING,
+        defaultValue: 'Before Amount'
+    },
+    decimalPlaces: {
+        type: DataTypes.INTEGER,
+        defaultValue: 2
+    },
+    thousandSeparatorStyle: {
+        type: DataTypes.STRING,
+        defaultValue: 'International'
+    },
+    defaultReminderTime: {
+        type: DataTypes.STRING,
+        defaultValue: '30 minutes'
     }
 });
 

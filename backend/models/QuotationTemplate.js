@@ -10,7 +10,7 @@ const QuotationTemplate = sequelize.define('QuotationTemplate', {
         type: DataTypes.STRING
     },
     content: {
-        type: DataTypes.TEXT,
+        type: DataTypes.TEXT('long'),
         allowNull: false
     }
 });

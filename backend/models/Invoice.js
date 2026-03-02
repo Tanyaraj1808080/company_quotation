@@ -14,6 +14,10 @@ const Invoice = sequelize.define('Invoice', {
         type: DataTypes.FLOAT,
         allowNull: false
     },
+    amountPaid: {
+        type: DataTypes.FLOAT,
+        defaultValue: 0
+    },
     issueDate: {
         type: DataTypes.DATEONLY,
         allowNull: false
