@@ -31,7 +31,7 @@ const Quotation = sequelize.define('Quotation', {
         defaultValue: 'Pending'
     },
     items: {
-        type: DataTypes.JSON // MySQL 5.7+ support
+        type: DataTypes.TEXT // Changed from JSON for better compatibility across MySQL versions
     }
 });
 

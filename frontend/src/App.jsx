@@ -38,6 +38,8 @@ import UsersRoles from './pages/system/UsersRoles';
 import AuditLogs from './pages/system/AuditLogs';
 import Automation from './pages/system/Automation';
 import Templates from './pages/system/Templates';
+import TaxesAndCharges from './pages/system/TaxesAndCharges';
+import TermsConditionsPage from './pages/system/TermsAndConditions';
 import AccountingIntegration from './pages/system/AccountingIntegration';
 import ClientLogin from './pages/portal/ClientLogin';
 import ForgotPassword from './pages/portal/ForgotPassword';
@@ -93,6 +95,8 @@ function App() {
           <Route path="audit-logs" element={<AuditLogs />} />
           <Route path="automation" element={<Automation />} />
           <Route path="templates" element={<Templates />} />
+          <Route path="taxes-charges" element={<TaxesAndCharges />} />
+          <Route path="terms-conditions" element={<TermsConditionsPage />} />
           <Route path="accounting-integration" element={<AccountingIntegration />} />
         </Route>
       </Routes>

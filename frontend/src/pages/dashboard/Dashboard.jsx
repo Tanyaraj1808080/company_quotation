@@ -163,11 +163,11 @@ const Dashboard = () => {
       </div>
 
       {/* KPI Cards */}
-      <div className="row g-4 mb-5">
+      <div className="row g-3 g-md-4 mb-5">
         {kpis.map((kpi, idx) => (
-          <div className="col-md-4 col-lg-2" key={idx}>
-            <div className="card h-100 border-0 shadow-sm card-hover p-2">
-              <div className="card-body">
+          <div className="col-12 col-sm-6 col-md-4 col-xl-2" key={idx}>
+            <div className="card h-100 border-0 shadow-sm card-hover">
+              <div className="card-body p-3 p-md-4">
                 <div className="d-flex justify-content-between align-items-start mb-3">
                   <div className={`bg-${kpi.color} bg-opacity-10 text-${kpi.color} rounded-3 p-2 d-flex align-items-center justify-content-center`} style={{width: '40px', height: '40px'}}>
                     <i className={`bi ${kpi.icon} fs-5`}></i>

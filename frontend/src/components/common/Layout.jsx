@@ -11,22 +11,21 @@ const Layout = () => {
   };
 
   return (
-    <div className="d-flex min-vh-100">
-      {/* Passing state and toggle to Sidebar */}
+    <div className="layout-wrapper min-vh-100">
       <Sidebar isActive={isSidebarActive} toggleSidebar={toggleSidebar} />
       
       <main className={`main-content ${isSidebarActive ? 'active' : ''}`}>
-        {/* Passing toggle to Navbar for the hamburger button */}
         <Navbar toggleSidebar={toggleSidebar} />
-        <div className="container-fluid px-0">
+        
+        <div className="container-fluid px-0 px-md-4 py-4">
           <Outlet />
         </div>
       </main>
 
-      {/* Mobile Overlay */}
+      {/* Backdrop for mobile/tablet (< 992px) */}
       {isSidebarActive && (
         <div 
-          className="sidebar-overlay d-md-none" 
+          className="sidebar-backdrop d-lg-none"
           onClick={toggleSidebar}
           style={{
             position: 'fixed',
@@ -34,8 +33,10 @@ const Layout = () => {
             left: 0,
             width: '100vw',
             height: '100vh',
-            background: 'rgba(0,0,0,0.5)',
-            zIndex: 1040
+            background: 'rgba(15, 23, 42, 0.5)',
+            backdropFilter: 'blur(4px)',
+            zIndex: 1045,
+            cursor: 'pointer'
           }}
         ></div>
       )}

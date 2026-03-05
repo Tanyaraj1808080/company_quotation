@@ -223,32 +223,46 @@ app.get('/api/quotations/:id', async (req, res) => {
 
 app.post('/api/quotations', async (req, res) => {
     try {
-        console.log('Received Quotation Payload:', req.body);
-        const { clientName, totalValue, currency, items, dateCreated } = req.body;
+        console.log('Received Quotation Payload:', JSON.stringify(req.body, null, 2));
+        let { clientName, totalValue, currency, items, dateCreated } = req.body;
         
         if (!clientName || totalValue === undefined) {
             return res.status(400).json({ message: 'clientName and totalValue are required.' });
         }
 
-        const count = await Quotation.count();
-        const id = `Q-${String(count + 1).padStart(3, '0')}`;
+        // Robust ID generation
+        const quotations = await Quotation.findAll({ attributes: ['id'] });
+        let nextIdNum = quotations.length + 1;
+        let id = `Q-${String(nextIdNum).padStart(3, '0')}`;
+        while (quotations.some(q => q.id === id)) {
+            nextIdNum++;
+            id = `Q-${String(nextIdNum).padStart(3, '0')}`;
+        }
+
+        // Handle items as a string for the TEXT column
+        let itemsStr = "[]";
+        if (items) {
+            itemsStr = typeof items === 'string' ? items : JSON.stringify(items);
+        }
+
         const newQuotation = await Quotation.create({
             id,
-            clientName,
-            totalValue,
-            currency,
-            items,
+            clientName: String(clientName),
+            totalValue: parseFloat(totalValue) || 0,
+            currency: currency || 'INR',
+            items: itemsStr,
             dateCreated: dateCreated || new Date().toISOString().split('T')[0],
             status: 'Pending'
         });
+        
         console.log('Quotation created successfully:', newQuotation.id);
         res.status(201).json(newQuotation);
     } catch (error) {
-        console.error('Error creating quotation:', error);
+        console.error('CRITICAL: Error creating quotation:', error);
         res.status(400).json({ 
-            message: error.message,
-            stack: error.stack,
-            errors: error.errors // Sequelize validation errors
+            message: `Database error: ${error.name}`,
+            details: error.message,
+            validationErrors: error.errors ? error.errors.map(e => e.message) : []
         });
     }
 });
@@ -256,6 +270,9 @@ app.post('/api/quotations', async (req, res) => {
 app.patch('/api/quotations/:id', async (req, res) => {
     try {
         const quotation = await Quotation.findByPk(req.params.id);
+        console.log(req.body);
+        
+        
         if (quotation) {
             await quotation.update(req.body);
             res.json(quotation);
@@ -698,6 +715,28 @@ app.get('/api/quotation-templates', async (req, res) => {
 app.post('/api/quotation-templates', async (req, res) => {
     try {
         const newTemplate = await QuotationTemplate.create(req.body);
+        
+        // Also create a Quotation entry in the Quotations table
+        try {
+            const content = JSON.parse(req.body.content);
+            const count = await Quotation.count();
+            const id = `Q-${String(count + 1).padStart(3, '0')}`;
+            
+            await Quotation.create({
+                id,
+                clientName: content.clientName || 'New Client',
+                totalValue: content.total || 0,
+                currency: 'INR',
+                items: JSON.stringify(content.items || []),
+                dateCreated: content.quoteDate || new Date().toISOString().split('T')[0],
+                status: 'Draft' // Templates created as Quotations start as Draft
+            });
+            console.log(`Auto-created Quotation ${id} from Template: ${newTemplate.name}`);
+        } catch (innerError) {
+            console.error('Error auto-creating quotation from template:', innerError);
+            // We don't fail the template creation if quotation creation fails
+        }
+
         res.status(201).json(newTemplate);
     } catch (error) {
         res.status(400).json({ message: error.message });

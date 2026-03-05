@@ -21,14 +21,25 @@ const EditQuotation = () => {
       try {
         const response = await axios.get(`/api/quotations/${id}`);
         const q = response.data;
+        
+        let items = [];
+        if (q.items) {
+          try {
+            items = typeof q.items === 'string' ? JSON.parse(q.items) : q.items;
+          } catch (e) {
+            console.error("Error parsing items:", e);
+            items = [];
+          }
+        }
+
         setFormData({
-          clientName: q.clientName,
-          quotationDate: q.dateCreated,
-          itemDescription: q.items && q.items[0] ? q.items[0].description : '',
-          itemQty: q.items && q.items[0] ? q.items[0].quantity : 1,
-          itemPrice: q.items && q.items[0] ? q.items[0].price : '',
-          currency: q.currency,
-          status: q.status
+          clientName: q.clientName || '',
+          quotationDate: q.dateCreated || '',
+          itemDescription: items && items[0] ? items[0].description : '',
+          itemQty: items && items[0] ? items[0].quantity : 1,
+          itemPrice: items && items[0] ? items[0].price : '',
+          currency: q.currency || 'USD',
+          status: q.status || 'Pending'
         });
         setLoading(false);
       } catch (error) {
@@ -48,22 +59,24 @@ const EditQuotation = () => {
     try {
       const payload = {
         clientName: formData.clientName,
-        totalValue: parseFloat(formData.itemQty) * parseFloat(formData.itemPrice),
+        totalValue: parseFloat(formData.itemQty || 0) * parseFloat(formData.itemPrice || 0),
         currency: formData.currency,
         dateCreated: formData.quotationDate,
         status: formData.status,
-        items: [{
+        items: JSON.stringify([{
           description: formData.itemDescription,
           quantity: formData.itemQty,
-          price: formData.itemPrice
-        }]
+          price: formData.itemPrice,
+          amount: (parseFloat(formData.itemQty || 0) * parseFloat(formData.itemPrice || 0)).toFixed(2)
+        }])
       };
       await axios.patch(`/api/quotations/${id}`, payload);
       alert('Quotation updated successfully!');
       navigate('/all-quotations');
     } catch (error) {
       console.error('Error updating quotation:', error);
-      alert('Failed to update quotation.');
+      const errorMsg = error.response?.data?.message || 'Failed to update quotation.';
+      alert(errorMsg);
     }
   };
 
@@ -131,11 +144,15 @@ const EditQuotation = () => {
               </div>
             </div>
 
-            <div className="alert alert-info">
+            <div className="alert alert-primary bg-primary bg-opacity-10 border-primary border-opacity-25">
               <div className="d-flex justify-content-between align-items-center">
-                <span>Estimated Total:</span>
-                <strong className="fs-4">
-                  {new Intl.NumberFormat('en-US', { style: 'currency', currency: formData.currency }).format(parseFloat(formData.itemQty || 0) * parseFloat(formData.itemPrice || 0))}
+                <span className="fw-bold text-primary">Total Amount:</span>
+                <strong className="fs-3 text-primary">
+                  {formData.currency === 'INR' ? '₹' : 
+                   formData.currency === 'USD' ? '$' : 
+                   formData.currency === 'EUR' ? '€' : 
+                   formData.currency === 'GBP' ? '£' : ''}
+                  {(parseFloat(formData.itemQty || 0) * parseFloat(formData.itemPrice || 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </strong>
               </div>
             </div>

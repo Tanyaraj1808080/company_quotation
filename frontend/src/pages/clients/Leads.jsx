@@ -469,21 +469,22 @@ const Leads = () => {
   return (
     <div className="container-fluid p-0 position-relative">
       {/* Header Toolbar */}
-      <div className="bg-white border-bottom p-3 d-flex justify-content-between align-items-center sticky-top shadow-sm" style={{ zIndex: 100 }}>
-        <div>
-          <h4 className="mb-0 fw-bold text-dark">
-            <i className="bi bi-grid-3x3-gap-fill me-2 text-primary"></i>Lead Management System
-          </h4>
-          <div className="d-flex align-items-center mt-1">
-            <div className="btn-group btn-group-sm me-3 border rounded-pill overflow-hidden">
+      <div className="bg-white border-bottom p-2 p-md-3 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center sticky-top shadow-sm gap-2" style={{ zIndex: 100 }}>
+        <div className="w-100 w-md-auto">
+          <h5 className="mb-1 mb-md-0 fw-bold text-dark d-flex align-items-center" style={{ fontSize: '1.1rem' }}>
+            <i className="bi bi-grid-3x3-gap-fill me-2 text-primary"></i>
+            <span className="text-truncate">Lead Management</span>
+          </h5>
+          <div className="d-flex flex-wrap align-items-center mt-1 gap-2">
+            <div className="btn-group border rounded-pill overflow-hidden" style={{ fontSize: '0.75rem' }}>
               <button 
-                className={`btn px-3 ${viewMode === 'today' ? 'btn-primary' : 'btn-light'}`} 
+                className={`btn btn-xs py-1 px-2 ${viewMode === 'today' ? 'btn-primary' : 'btn-light'}`} 
                 onClick={() => setViewMode('today')}
               >
-                <i className="bi bi-calendar-event me-1"></i> Today's Focus
+                <i className="bi bi-calendar-event me-1"></i> Today
               </button>
               <button 
-                className={`btn px-3 ${viewMode === 'master' ? 'btn-primary' : 'btn-light'}`} 
+                className={`btn btn-xs py-1 px-2 ${viewMode === 'master' ? 'btn-primary' : 'btn-light'}`} 
                 onClick={() => setViewMode('master')}
               >
                 <i className="bi bi-database-fill me-1"></i> Master Sheet
@@ -491,12 +492,12 @@ const Leads = () => {
             </div>
 
             {viewMode === 'today' && (
-              <div className="d-flex align-items-center gap-2 me-3">
+              <div className="d-flex align-items-center gap-1">
                 <select 
-                  className="form-select form-select-sm border-primary rounded-pill px-3 fw-bold shadow-sm" 
+                  className="form-select form-select-sm border-primary rounded-pill py-0 px-2 fw-bold shadow-sm" 
                   value={filterRange} 
                   onChange={(e) => setFilterRange(e.target.value)}
-                  style={{ width: 'auto', minWidth: '130px' }}
+                  style={{ width: 'auto', minWidth: '110px', fontSize: '0.75rem', height: '28px' }}
                 >
                   <option value="0">Today Only</option>
                   <option value="7">Last 7 Days</option>
@@ -508,36 +509,38 @@ const Leads = () => {
                 {filterRange === 'custom' && (
                   <input 
                     type="date" 
-                    className="form-control form-control-sm border-primary rounded-pill px-3 shadow-sm" 
+                    className="form-control form-control-sm border-primary rounded-pill py-0 px-2 shadow-sm" 
                     value={customFilterDate} 
                     onChange={(e) => setCustomFilterDate(e.target.value)} 
-                    style={{ width: 'auto' }}
+                    style={{ width: 'auto', fontSize: '0.75rem', height: '28px' }}
                   />
                 )}
               </div>
             )}
 
             {isDirty ? (
-              <span className="badge bg-warning text-dark me-2 animated pulse infinite"><i className="bi bi-exclamation-triangle-fill me-1"></i>Unsaved Changes</span>
+              <span className="badge bg-warning text-dark animated pulse infinite" style={{ fontSize: '0.65rem' }}><i className="bi bi-exclamation-triangle-fill me-1"></i>Unsaved</span>
             ) : (
-              <span className="badge bg-success me-2"><i className="bi bi-check-all me-1"></i>All Synced</span>
+              <span className="badge bg-success" style={{ fontSize: '0.65rem' }}><i className="bi bi-check-all me-1"></i>Synced</span>
             )}
           </div>
         </div>
-        <div className="d-flex gap-2">
-          <button className={`btn btn-sm rounded-pill px-3 shadow-sm ${todayAgenda.length > 0 ? 'btn-danger flash-urgent' : 'btn-outline-secondary'}`} onClick={() => setShowAgendaModal(true)}>
-            <i className={`bi bi-alarm-fill me-1 ${todayAgenda.length > 0 ? 'text-white' : ''}`}></i> 
-            Meeting Alerts {todayAgenda.length > 0 && <span className="badge bg-white text-danger ms-1">{todayAgenda.length}</span>}
+        <div className="d-flex flex-wrap gap-1 w-100 w-md-auto justify-content-start justify-content-md-end">
+          <button className={`btn py-1 px-2 rounded-pill shadow-sm d-flex align-items-center ${todayAgenda.length > 0 ? 'btn-danger flash-urgent text-white' : 'btn-outline-secondary'}`} onClick={() => setShowAgendaModal(true)} style={{ fontSize: '0.75rem' }}>
+            <i className="bi bi-alarm-fill me-1"></i> 
+            <span className="d-none d-sm-inline">Meeting Alert</span> {todayAgenda.length > 0 && <span className="badge bg-white text-danger ms-1">{todayAgenda.length}</span>}
           </button>
-          <button className="btn btn-outline-success btn-sm rounded-pill px-3" onClick={exportToExcel}>
-            <i className="bi bi-file-earmark-excel-fill me-1"></i> Export Excel
+          <button className="btn btn-outline-success py-1 px-2 rounded-pill d-flex align-items-center" onClick={exportToExcel} style={{ fontSize: '0.75rem' }}>
+            <i className="bi bi-file-earmark-excel-fill me-1"></i> 
+            <span className="d-none d-sm-inline">Export</span>
           </button>
-          <button className="btn btn-outline-secondary btn-sm rounded-pill px-3" onClick={() => setShowColModal(true)}>
-            <i className="bi bi-plus-lg me-1"></i> New Column
+          <button className="btn btn-outline-secondary py-1 px-2 rounded-pill d-flex align-items-center" onClick={() => setShowColModal(true)} style={{ fontSize: '0.75rem' }}>
+            <i className="bi bi-plus-lg me-1"></i> 
+            <span className="d-none d-sm-inline">Column</span>
           </button>
-          <button className="btn btn-primary btn-sm rounded-pill px-4 shadow-sm" onClick={saveAll} disabled={saving || (!isDirty && leads.length > 0)}>
-            {saving ? <span className="spinner-border spinner-border-sm me-2"></span> : <i className="bi bi-cloud-check-fill me-2"></i>}
-            {saving ? 'Saving...' : 'Sync Master Sheet'}
+          <button className="btn btn-primary py-1 px-3 rounded-pill shadow-sm d-flex align-items-center fw-bold" onClick={saveAll} disabled={saving || (!isDirty && leads.length > 0)} style={{ fontSize: '0.75rem' }}>
+            {saving ? <span className="spinner-border spinner-border-sm me-1"></span> : <i className="bi bi-cloud-check-fill me-1"></i>}
+            <span>{saving ? 'Saving...' : 'Sync Data'}</span>
           </button>
         </div>
       </div>

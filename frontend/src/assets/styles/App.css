@@ -29,34 +29,22 @@ body {
 }
 
 /* --- Layout Structure --- */
+:root {
+    --sidebar-width: 280px;
+    --navbar-height: 70px;
+    --transition-speed: 0.3s;
+}
+
 .main-content {
     margin-left: var(--sidebar-width);
     width: calc(100% - var(--sidebar-width));
     min-height: 100vh;
-    padding: 1.5rem 1rem; /* Full width feel */
-    transition: all 0.3s ease;
+    padding: 1.5rem;
+    transition: all var(--transition-speed) ease;
+    position: relative;
 }
 
-.main-content.active {
-    margin-left: 0;
-    width: 100%;
-}
-
-/* Full Width Utility */
-.container-fluid, .container-xl, .container-lg, .container-md, .container-sm, .container {
-    max-width: 100% !important;
-    width: 100% !important;
-}
-
-@media (max-width: 768px) {
-    .main-content {
-        margin-left: 0;
-        width: 100%;
-        padding: 1rem;
-    }
-}
-
-/* --- Navigation & Sidebar --- */
+/* Sidebar Responsive Logic */
 .sidebar {
     position: fixed;
     top: 0;
@@ -65,13 +53,60 @@ body {
     width: var(--sidebar-width);
     background: #fff;
     border-right: 1px solid var(--border-soft);
-    box-shadow: 4px 0 10px rgba(0,0,0,0.02);
-    transition: all 0.3s ease;
-    z-index: 1000;
+    z-index: 1050;
+    transition: transform var(--transition-speed) ease;
 }
 
-.sidebar.active {
-    left: calc(-1 * var(--sidebar-width));
+/* Mobile & Tablet State (< 992px) */
+@media (max-width: 991.98px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    .sidebar.active {
+        transform: translateX(0);
+        box-shadow: 10px 0 30px rgba(0,0,0,0.1);
+    }
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 1rem;
+    }
+    .main-content.active {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+/* --- Responsive Utilities --- */
+.table-responsive {
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-soft);
+}
+
+@media (max-width: 767.98px) {
+    .card-body { padding: 1rem; }
+    .display-4 { font-size: 2.5rem; }
+    .h1, h1 { font-size: 1.75rem; }
+    .h2, h2 { font-size: 1.5rem; }
+    
+    /* Stack form groups on mobile */
+    .row > [class*="col-"] {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Utility to prevent horizontal scroll */
+body, html {
+    overflow-x: hidden;
+    width: 100%;
+}
+
+/* --- Navigation & Navbar --- */
+.top-navbar {
+    height: var(--navbar-height);
+    position: sticky;
+    top: 0;
+    z-index: 1040;
 }
 
 .sidebar .nav-link {

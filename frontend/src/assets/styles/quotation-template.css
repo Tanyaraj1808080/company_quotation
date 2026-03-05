@@ -1,18 +1,40 @@
 .quotation-container {
     background: #f2f2f2;
     font-family: Arial, sans-serif;
-    padding: 20px;
+    padding: 10px;
+    width: 100%;
+}
+
+@media (min-width: 768px) {
+    .quotation-container {
+        padding: 20px;
+    }
+}
+
+.quotation-page-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 20px;
+    -webkit-overflow-scrolling: touch;
 }
 
 .quotation-page {
     width: 210mm;
+    min-width: 210mm;
     min-height: 297mm;
-    margin: 20px auto;
+    margin: 10px auto;
     background: white;
-    padding: 20mm;
+    padding: 10mm;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
     box-sizing: border-box;
     position: relative;
+}
+
+@media (min-width: 768px) {
+    .quotation-page {
+        margin: 20px auto;
+        padding: 20mm;
+    }
 }
 
 .quotation-header {
@@ -48,6 +70,7 @@
 .client-name {
     color: #003366;
     font-weight: bold;
+    font-size: 1.2rem;
 }
 
 .quotation-table {
@@ -60,6 +83,8 @@
     background: #b9d2f3;
     padding: 12px 10px;
     text-align: left;
+    font-weight: bold;
+    color: #003366;
 }
 
 .quotation-table td {
@@ -77,23 +102,25 @@
 
 .payment-section h4 {
     margin-bottom: 10px;
+    color: #003366;
 }
 
 .info-text {
     margin-top: 20px;
     font-size: 14px;
     line-height: 1.4;
+    color: #666;
 }
 
 .bank-details-container {
     margin-top: 30px;
     display: flex;
     justify-content: space-between;
+    gap: 20px;
 }
 
 .terms-section {
     flex: 1;
-    padding-right: 20px;
 }
 
 .total-section {
@@ -101,10 +128,19 @@
     text-align: right;
 }
 
+.total-section p {
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+}
+
 .total-section h3 {
     color: #003366;
     border-top: 2px solid #003366;
     padding-top: 10px;
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
 }
 
 .quotation-footer {
@@ -114,28 +150,83 @@
     font-weight: bold;
 }
 
-/* Print Specific Styles */
+/* --- REFINED PRINT STYLES --- */
+@page {
+    size: A4;
+    margin: 15mm 10mm; /* Default margin for all pages */
+}
+
+@page :first {
+    margin-top: 5mm; /* Reduced top margin for the first page only */
+}
+
 @media print {
-    body * {
-        visibility: hidden;
-    }
-    .quotation-page, .quotation-page * {
-        visibility: visible;
-    }
-    .quotation-page {
-        position: absolute;
-        left: 0;
-        top: 0;
-        margin: 0;
-        padding: 15mm;
-        box-shadow: none;
-    }
-    .no-print {
+    /* Hide all UI elements aggressively */
+    header, nav, .sidebar, .top-navbar, .no-print, .btn, .sidebar-backdrop, .no-print-area, 
+    .card.no-print, .action-bar, [className*="no-print"] {
         display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Reset global layout for print */
+    html, body {
+        width: 100% !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+        overflow: visible !important;
+    }
+
+    .layout-wrapper, 
+    .main-content, 
+    .container-fluid,
+    .quotation-container {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+        overflow: visible !important;
+    }
+
+    .quotation-page-wrapper {
+        width: 100% !important;
+        overflow: visible !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .quotation-page {
+        width: 100% !important; /* Let @page margins handle side spacing */
+        min-height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important; /* Using @page margins instead of internal padding */
+        box-shadow: none !important;
+        border: none !important;
+        display: block !important;
+    }
+
+    /* Prevent elements from being cut in half across pages */
+    .quotation-table tr, 
+    .payment-section, 
+    .bank-details-container, 
+    .total-section {
+        page-break-inside: avoid !important;
+    }
+
+    /* Force background colors and images */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
 }
 
-/* Editable specific */
+/* Editable specific styles */
 [contenteditable="true"]:hover {
     background-color: #f8f9fa;
     outline: 1px dashed #003366;
