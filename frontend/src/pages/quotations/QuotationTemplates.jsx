@@ -30,6 +30,8 @@ const QuotationTemplates = () => {
       { id: 7, quantity: 7, description: '[Social Media Design]', price: '[****]', amount: '[****]' },
     ],
     subtotal: '[****]',
+    discountRate: '0',
+    discount: '0.00',
     tax: '0.00',
     total: '[****]',
     paymentOptions: [
@@ -152,6 +154,25 @@ const QuotationTemplates = () => {
     }
   };
 
+  const calculateTotals = (items, discRate = templateData.discountRate, tx = templateData.tax) => {
+    const subtotal = items.reduce((sum, item) => sum + (parseFloat(item.amount.toString().replace(/[^\d.]/g, '')) || 0), 0);
+    const rate = parseFloat(discRate.toString().replace(/[^\d.]/g, '')) || 0;
+    const t = parseFloat(tx.toString().replace(/[^\d.]/g, '')) || 0;
+    
+    const discAmount = (subtotal * rate) / 100;
+    const total = subtotal - discAmount + t;
+    
+    setTemplateData(prev => ({
+      ...prev,
+      items,
+      subtotal: subtotal.toFixed(2),
+      discountRate: rate.toString(),
+      discount: discAmount.toFixed(2),
+      tax: t.toFixed(2),
+      total: total.toFixed(2)
+    }));
+  };
+
   const handleSubmitQuotation = async () => {
     if (!window.confirm('Are you sure you want to submit this as an active Quotation?')) return;
     
@@ -167,6 +188,8 @@ const QuotationTemplates = () => {
       clientName: templateData.clientName.replace(/[\[\]_]/g, '').trim() || 'New Client',
       clientAddress: templateData.clientAddress.replace(/[\[\]_]/g, '').trim() || '',
       totalValue: cleanNum(templateData.total),
+      discount: cleanNum(templateData.discount),
+      tax: cleanNum(templateData.tax),
       currency: 'INR',
       items: templateData.items.map(item => ({
         ...item,
@@ -209,27 +232,17 @@ const QuotationTemplates = () => {
   const updateField = (field, value) => {
     setTemplateData(prev => {
       const newData = { ...prev, [field]: value };
-      if (field === 'subtotal' || field === 'tax') {
-        const sub = parseFloat(newData.subtotal) || 0;
-        const tx = parseFloat(newData.tax) || 0;
-        newData.total = (sub + tx).toFixed(2);
+      if (field === 'discountRate' || field === 'tax' || field === 'subtotal') {
+        const subtotal = parseFloat(newData.subtotal.toString().replace(/[^\d.]/g, '')) || 0;
+        const rate = parseFloat(newData.discountRate.toString().replace(/[^\d.]/g, '')) || 0;
+        const tx = parseFloat(newData.tax.toString().replace(/[^\d.]/g, '')) || 0;
+        
+        const discAmount = (subtotal * rate) / 100;
+        newData.discount = discAmount.toFixed(2);
+        newData.total = (subtotal - discAmount + tx).toFixed(2);
       }
       return newData;
     });
-  };
-
-  const calculateTotals = (items) => {
-    const subtotal = items.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
-    const tax = subtotal * 0; 
-    const total = subtotal + tax;
-    
-    setTemplateData(prev => ({
-      ...prev,
-      items,
-      subtotal: subtotal.toFixed(2),
-      tax: tax.toFixed(2),
-      total: total.toFixed(2)
-    }));
   };
 
   const updateItem = (index, field, value) => {
@@ -420,7 +433,9 @@ const QuotationTemplates = () => {
               </div>
               <div className="total-section">
                 <p>SUBTOTAL : <span>₹{templateData.subtotal}</span></p>
-                <p>TAX : <span>₹{templateData.tax}</span></p>
+                <p>TAX (+) : <span contentEditable suppressContentEditableWarning onBlur={(e) => updateField('tax', e.target.innerText)}>{templateData.tax}</span></p>
+                <p className="text-danger">DISCOUNT (<span contentEditable suppressContentEditableWarning onBlur={(e) => updateField('discountRate', e.target.innerText)}>{templateData.discountRate}</span>%) : <span>₹{templateData.discount}</span></p>
+                <hr />
                 <h3>TOTAL : <span>₹{templateData.total}</span></h3>
               </div>
             </div>

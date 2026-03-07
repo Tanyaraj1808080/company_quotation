@@ -22,6 +22,14 @@ const Quotation = sequelize.define('Quotation', {
         type: DataTypes.FLOAT,
         allowNull: false
     },
+    discount: {
+        type: DataTypes.FLOAT,
+        defaultValue: 0
+    },
+    tax: {
+        type: DataTypes.FLOAT,
+        defaultValue: 0
+    },
     currency: {
         type: DataTypes.STRING,
         defaultValue: 'USD'

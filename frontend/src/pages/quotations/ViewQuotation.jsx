@@ -149,15 +149,23 @@ const ViewQuotation = () => {
             <div className="total-section bg-light p-3 rounded">
               <div className="d-flex justify-content-between mb-2">
                 <span>SUBTOTAL :</span>
-                <span className="fw-bold">₹{parseFloat(quotation.totalValue).toLocaleString()}</span>
+                <span className="fw-bold">₹{((parseFloat(quotation.totalValue) || 0) + (parseFloat(quotation.discount) || 0) - (parseFloat(quotation.tax) || 0)).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
               </div>
-              <div className="d-flex justify-content-between mb-2 border-bottom pb-2">
-                <span>TAX (0%) :</span>
-                <span className="fw-bold">₹0.00</span>
-              </div>
-              <div className="d-flex justify-content-between align-items-center">
+              {parseFloat(quotation.tax) > 0 && (
+                <div className="d-flex justify-content-between mb-2">
+                  <span>TAX (+) :</span>
+                  <span className="fw-bold">₹{parseFloat(quotation.tax).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                </div>
+              )}
+              {parseFloat(quotation.discount) > 0 && (
+                <div className="d-flex justify-content-between mb-2 text-danger">
+                  <span>DISCOUNT (-) :</span>
+                  <span className="fw-bold">₹{parseFloat(quotation.discount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                </div>
+              )}
+              <div className="d-flex justify-content-between align-items-center border-top pt-2">
                 <h3 className="mb-0 fw-bold" style={{ color: '#003366' }}>TOTAL :</h3>
-                <h3 className="mb-0 fw-bold" style={{ color: '#003366' }}>₹{parseFloat(quotation.totalValue).toLocaleString()}</h3>
+                <h3 className="mb-0 fw-bold" style={{ color: '#003366' }}>₹{parseFloat(quotation.totalValue).toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
               </div>
             </div>
           </div>

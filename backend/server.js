@@ -190,7 +190,7 @@ app.get('/api/quotations/:id', async (req, res) => {
 
 app.post('/api/quotations', async (req, res) => {
     try {
-        let { clientName, clientAddress, totalValue, currency, items, dateCreated } = req.body;
+        let { clientName, clientAddress, totalValue, discount, tax, currency, items, dateCreated } = req.body;
         if (!clientName || totalValue === undefined) return res.status(400).json({ message: 'clientName and totalValue are required.' });
         
         const quotations = await Quotation.findAll({ attributes: ['id'] });
@@ -206,7 +206,10 @@ app.post('/api/quotations', async (req, res) => {
         
         const newQuotation = await Quotation.create({
             id, clientName: String(clientName), clientAddress: clientAddress || null,
-            totalValue: parseFloat(totalValue) || 0, currency: currency || 'INR',
+            totalValue: parseFloat(totalValue) || 0,
+            discount: parseFloat(discount) || 0,
+            tax: parseFloat(tax) || 0,
+            currency: currency || 'INR',
             items: itemsStr, dateCreated: dateCreated || new Date().toISOString().split('T')[0], status: 'Pending'
         });
         res.status(201).json(newQuotation);
