@@ -74,8 +74,8 @@ const FollowUps = () => {
     <div className="p-4">
       <h2 className="mb-4 fw-bold text-dark">Follow Ups Overview</h2>
 
-      <div className="row mb-4">
-        <div className="col-md-4">
+      <div className="row mb-4 g-3">
+        <div className="col-12 col-md-4">
           <div className="card kpi-card shadow-sm border-0">
             <div className="card-body d-flex align-items-center">
               <div className="kpi-icon bg-primary shadow-sm text-white rounded-circle d-flex align-items-center justify-content-center" style={{width: '50px', height: '50px'}}>
@@ -88,7 +88,7 @@ const FollowUps = () => {
             </div>
           </div>
         </div>
-        <div className="col-md-4">
+        <div className="col-12 col-md-4">
           <div className="card kpi-card shadow-sm border-0">
             <div className="card-body d-flex align-items-center">
               <div className="kpi-icon bg-success shadow-sm text-white rounded-circle d-flex align-items-center justify-content-center" style={{width: '50px', height: '50px'}}>
@@ -101,7 +101,7 @@ const FollowUps = () => {
             </div>
           </div>
         </div>
-        <div className="col-md-4">
+        <div className="col-12 col-md-4">
           <div className="card kpi-card shadow-sm border-0">
             <div className="card-body d-flex align-items-center">
               <div className="kpi-icon bg-warning shadow-sm text-white rounded-circle d-flex align-items-center justify-content-center" style={{width: '50px', height: '50px'}}>
