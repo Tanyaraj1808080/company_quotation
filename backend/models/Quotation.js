@@ -14,6 +14,10 @@ const Quotation = sequelize.define('Quotation', {
         type: DataTypes.STRING,
         allowNull: false
     },
+    clientAddress: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
     totalValue: {
         type: DataTypes.FLOAT,
         allowNull: false

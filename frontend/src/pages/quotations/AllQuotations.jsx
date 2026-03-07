@@ -5,6 +5,7 @@ import axios from 'axios';
 const AllQuotations = () => {
   const [quotations, setQuotations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedIds, setSelectedIds] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,9 +28,40 @@ const AllQuotations = () => {
       try {
         await axios.delete(`/api/quotations/${id}`);
         setQuotations(quotations.filter(q => q.id !== id));
+        setSelectedIds(selectedIds.filter(selectedId => selectedId !== id));
       } catch (error) {
         console.error('Error deleting quotation:', error);
       }
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (window.confirm(`Are you sure you want to delete ${selectedIds.length} selected quotations?`)) {
+      try {
+        await axios.post('/api/quotations/bulk-delete', { ids: selectedIds });
+        setQuotations(quotations.filter(q => !selectedIds.includes(q.id)));
+        setSelectedIds([]);
+        alert('Selected quotations deleted successfully.');
+      } catch (error) {
+        console.error('Error in bulk delete:', error);
+        alert('Failed to delete selected quotations.');
+      }
+    }
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === quotations.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(quotations.map(q => q.id));
+    }
+  };
+
+  const toggleSelectRow = (id) => {
+    if (selectedIds.includes(id)) {
+      setSelectedIds(selectedIds.filter(item => item !== id));
+    } else {
+      setSelectedIds([...selectedIds, id]);
     }
   };
 
@@ -59,6 +91,11 @@ const AllQuotations = () => {
             <p className="text-muted small mb-0">Total {quotations.length} records found in database</p>
           </div>
           <div className="d-flex gap-2">
+            {selectedIds.length > 0 && (
+              <button className="btn btn-danger rounded-pill px-4 shadow-sm" onClick={handleBulkDelete}>
+                <i className="bi bi-trash3-fill me-2"></i>Delete Selected ({selectedIds.length})
+              </button>
+            )}
             <button className="btn btn-modern-secondary shadow-sm" onClick={exportToCSV}>
               <i className="bi bi-file-earmark-arrow-down me-2"></i>Export CSV
             </button>
@@ -72,7 +109,15 @@ const AllQuotations = () => {
             <table className="table table-hover align-middle mb-0">
               <thead className="bg-light">
                 <tr>
-                  <th className="ps-4 py-3 border-0 small fw-bold text-uppercase text-muted">Quote ID</th>
+                  <th className="ps-4 py-3 border-0">
+                    <input 
+                      type="checkbox" 
+                      className="form-check-input" 
+                      checked={quotations.length > 0 && selectedIds.length === quotations.length}
+                      onChange={toggleSelectAll}
+                    />
+                  </th>
+                  <th className="py-3 border-0 small fw-bold text-uppercase text-muted">Quote ID</th>
                   <th className="py-3 border-0 small fw-bold text-uppercase text-muted">Client Name</th>
                   <th className="py-3 border-0 small fw-bold text-uppercase text-muted">Amount</th>
                   <th className="py-3 border-0 small fw-bold text-uppercase text-muted">Date Created</th>
@@ -82,11 +127,19 @@ const AllQuotations = () => {
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan="6" className="text-center py-5"><div className="spinner-border text-primary spinner-border-sm"></div></td></tr>
+                  <tr><td colSpan="7" className="text-center py-5"><div className="spinner-border text-primary spinner-border-sm"></div></td></tr>
                 ) : (
                   quotations.map(q => (
-                    <tr key={q.id} className="modern-row">
-                      <td className="ps-4 fw-bold text-primary">{q.id}</td>
+                    <tr key={q.id} className={`modern-row ${selectedIds.includes(q.id) ? 'table-active' : ''}`}>
+                      <td className="ps-4">
+                        <input 
+                          type="checkbox" 
+                          className="form-check-input" 
+                          checked={selectedIds.includes(q.id)}
+                          onChange={() => toggleSelectRow(q.id)}
+                        />
+                      </td>
+                      <td className="fw-bold text-primary">{q.id}</td>
                       <td className="fw-medium">{q.clientName}</td>
                       <td className="fw-bold text-dark">₹{parseFloat(q.totalValue).toLocaleString()}</td>
                       <td className="text-muted small">{q.dateCreated}</td>
@@ -174,6 +227,11 @@ const AllQuotations = () => {
         
         .fade-in { animation: fadeIn 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .form-check-input:checked {
+          background-color: #ef4444;
+          border-color: #ef4444;
+        }
       `}} />
     </div>
   );

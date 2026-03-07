@@ -165,6 +165,7 @@ const QuotationTemplates = () => {
 
     const payload = {
       clientName: templateData.clientName.replace(/[\[\]_]/g, '').trim() || 'New Client',
+      clientAddress: templateData.clientAddress.replace(/[\[\]_]/g, '').trim() || '',
       totalValue: cleanNum(templateData.total),
       currency: 'INR',
       items: templateData.items.map(item => ({
@@ -178,16 +179,13 @@ const QuotationTemplates = () => {
     };
 
     try {
-      console.log('Submitting Quotation Payload:', payload);
       await axios.post('/api/quotations', payload);
       setSaveStatus('success');
-      alert('Quotation submitted successfully and added to "All Quotations"!');
+      alert('Quotation submitted successfully!');
       setTimeout(() => setShowEditor(false), 500);
     } catch (error) {
       console.error('Error submitting quotation:', error);
-      const errorMsg = error.response?.data?.message || 'Error submitting quotation. Please check the data.';
-      const detailMsg = error.response?.data?.details ? `\nDetails: ${error.response.data.details.join(', ')}` : '';
-      alert(`${errorMsg}${detailMsg}`);
+      alert('Error submitting quotation.');
     } finally {
       setIsSubmitting(false);
     }
@@ -211,7 +209,6 @@ const QuotationTemplates = () => {
   const updateField = (field, value) => {
     setTemplateData(prev => {
       const newData = { ...prev, [field]: value };
-      // If subtotal or tax changes manually, recalculate total
       if (field === 'subtotal' || field === 'tax') {
         const sub = parseFloat(newData.subtotal) || 0;
         const tx = parseFloat(newData.tax) || 0;
@@ -223,7 +220,7 @@ const QuotationTemplates = () => {
 
   const calculateTotals = (items) => {
     const subtotal = items.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
-    const tax = subtotal * 0; // You can change 0 to 0.18 for 18% tax etc.
+    const tax = subtotal * 0; 
     const total = subtotal + tax;
     
     setTemplateData(prev => ({
@@ -238,18 +235,12 @@ const QuotationTemplates = () => {
   const updateItem = (index, field, value) => {
     const newItems = [...templateData.items];
     const item = { ...newItems[index] };
-    
-    // Clean and update the specific field
-    const cleanedValue = value.toString().replace(/[^\d.]/g, '');
-    item[field] = cleanedValue;
+    item[field] = value;
 
-    // Auto-calculate row amount if quantity or price changes
     if (field === 'quantity' || field === 'price') {
-      const qty = parseFloat(item.quantity) || 0;
-      const prc = parseFloat(item.price) || 0;
+      const qty = parseFloat(item.quantity.toString().replace(/[^\d.]/g, '')) || 0;
+      const prc = parseFloat(item.price.toString().replace(/[^\d.]/g, '')) || 0;
       item.amount = (qty * prc).toFixed(2);
-    } else if (field === 'amount') {
-      item.amount = parseFloat(cleanedValue) || 0;
     }
 
     newItems[index] = item;
@@ -274,37 +265,17 @@ const QuotationTemplates = () => {
           </div>
           <div className="d-flex gap-2 align-items-center">
             {saveStatus === 'success' && <span className="text-success small fw-bold"><i className="bi bi-check-circle-fill me-1"></i>Action Success!</span>}
-            {saveStatus === 'error' && <span className="text-danger small fw-bold"><i className="bi bi-exclamation-triangle-fill me-1"></i>Error occurred</span>}
-            
             <button className="btn btn-info text-white" onClick={downloadQuotation}>
               <i className="bi bi-download me-1"></i>Download
             </button>
-
             <button 
               className="btn btn-success shadow-sm" 
               onClick={handleSubmitQuotation}
               disabled={isSubmitting}
             >
-              {isSubmitting ? (
-                <><span className="spinner-border spinner-border-sm me-2"></span>Submitting...</>
-              ) : (
-                <><i className="bi bi-send-check me-1"></i>Submit Quotation</>
-              )}
+              {isSubmitting ? 'Submitting...' : 'Submit Quotation'}
             </button>
           </div>
-        </div>
-
-        <div className="no-print card mb-4 p-3 border-0 shadow-sm">
-           <div className="row g-3">
-              <div className="col-md-6">
-                <label className="form-label small fw-bold">Template Name</label>
-                <input type="text" className="form-control form-control-sm" value={templateData.name} onChange={(e) => updateField('name', e.target.value)} />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label small fw-bold">Description</label>
-                <input type="text" className="form-control form-control-sm" value={templateData.description} onChange={(e) => updateField('description', e.target.value)} />
-              </div>
-           </div>
         </div>
 
         <div className="quotation-page-wrapper">
@@ -312,7 +283,7 @@ const QuotationTemplates = () => {
             <div className="quotation-header">
               <div className="quotation-logo position-relative group">
                 <input type="file" ref={logoInputRef} className="d-none" accept="image/*" onChange={handleLogoUpload} />
-                <img src={templateData.logo || companyLogo} alt="logo" style={{ width: '140px', height: '140px', objectFit: 'contain' }} />
+                <img src={templateData.logo || companyLogo} alt="logo" style={{ width: '100px', height: '100px', objectFit: 'contain' }} />
                 <div className="no-print logo-controls position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-25 opacity-0 hover-opacity-100 transition-opacity">
                   <div className="d-flex gap-2">
                     <button className="btn btn-sm btn-light rounded-circle shadow-sm" onClick={() => logoInputRef.current.click()}><i className="bi bi-pencil-fill"></i></button>
@@ -333,7 +304,6 @@ const QuotationTemplates = () => {
               </div>
               <div>
                 <p>Quotation No: <span contentEditable suppressContentEditableWarning onBlur={(e) => updateField('quoteNo', e.target.innerText)}>{templateData.quoteNo}</span></p>
-                <p>Due Date : <span contentEditable suppressContentEditableWarning onBlur={(e) => updateField('dueDate', e.target.innerText)}>{templateData.dueDate}</span></p>
                 <p>Quotation Date : <span contentEditable suppressContentEditableWarning onBlur={(e) => updateField('quoteDate', e.target.innerText)}>{templateData.quoteDate}</span></p>
               </div>
             </div>
@@ -352,7 +322,10 @@ const QuotationTemplates = () => {
                 {templateData.items.map((item, index) => (
                   <tr key={index}>
                     <td className="no-print">
-                      <button className="btn btn-sm btn-link text-danger p-0" onClick={() => updateField('items', templateData.items.filter((_, i) => i !== index))}><i className="bi bi-x-circle"></i></button>
+                      <button className="btn btn-sm btn-link text-danger p-0" onClick={() => {
+                        const newItems = templateData.items.filter((_, i) => i !== index);
+                        calculateTotals(newItems);
+                      }}><i className="bi bi-x-circle"></i></button>
                     </td>
                     <td contentEditable suppressContentEditableWarning onBlur={(e) => updateItem(index, 'quantity', e.target.innerText)}>{item.quantity}</td>
                     <td contentEditable suppressContentEditableWarning onBlur={(e) => updateItem(index, 'description', e.target.innerText)}>{item.description}</td>
@@ -362,7 +335,12 @@ const QuotationTemplates = () => {
                 ))}
                 <tr className="no-print">
                   <td colSpan="5" className="text-center">
-                    <button className="btn btn-sm btn-link text-primary text-decoration-none" onClick={() => updateField('items', [...templateData.items, { id: Date.now(), quantity: 1, description: 'New Item', price: 0, amount: 0 }])}>
+                    <button className="btn btn-sm btn-link text-primary text-decoration-none" onClick={() => {
+                      const lastItem = templateData.items[templateData.items.length - 1];
+                      const newQty = lastItem ? parseInt(lastItem.quantity.toString().replace(/[^\d.]/g, '')) + 1 : 1;
+                      const newItems = [...templateData.items, { id: Date.now(), quantity: newQty, description: '[NEW ITEM]', price: '[****]', amount: '[****]' }];
+                      calculateTotals(newItems);
+                    }}>
                       <i className="bi bi-plus-circle me-1"></i>Add Row
                     </button>
                   </td>
@@ -410,7 +388,13 @@ const QuotationTemplates = () => {
                           <td colSpan="5" className="text-center">
                             <button className="btn btn-sm btn-link text-primary text-decoration-none" onClick={() => {
                               const newOpts = [...templateData.paymentOptions];
-                              newOpts[optIdx].milestones.push({ stage: 'New Stage', description: 'Description', amount: '0', percentage: '0%' });
+                              const mileCount = newOpts[optIdx].milestones.length + 1;
+                              newOpts[optIdx].milestones.push({ 
+                                stage: `Payment ${mileCount}`, 
+                                description: '[DESCRIPTION]', 
+                                amount: '[*****]', 
+                                percentage: '[**%]' 
+                              });
                               updateField('paymentOptions', newOpts);
                             }}><i className="bi bi-plus-circle me-1"></i>Add Milestone</button>
                           </td>
@@ -435,9 +419,9 @@ const QuotationTemplates = () => {
                 <div className="quotation-footer">Thank for your business with us !</div>
               </div>
               <div className="total-section">
-                <p>SUBTOTAL : <span contentEditable suppressContentEditableWarning onBlur={(e) => updateField('subtotal', e.target.innerText)}>₹{templateData.subtotal}</span></p>
-                <p>TAX : <span contentEditable suppressContentEditableWarning onBlur={(e) => updateField('tax', e.target.innerText)}>₹{templateData.tax}</span></p>
-                <h3>TOTAL : <span contentEditable suppressContentEditableWarning onBlur={(e) => updateField('total', e.target.innerText)}>₹{templateData.total}</span></h3>
+                <p>SUBTOTAL : <span>₹{templateData.subtotal}</span></p>
+                <p>TAX : <span>₹{templateData.tax}</span></p>
+                <h3>TOTAL : <span>₹{templateData.total}</span></h3>
               </div>
             </div>
           </div>

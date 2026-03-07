@@ -95,7 +95,6 @@ const ViewQuotation = () => {
                 {quotation.clientName}
               </span><br />
               <div className="text-muted mt-1" style={{ maxWidth: '300px' }}>
-                {/* Fallback address if not available in basic quotation object */}
                 {quotation.clientAddress || 'Client Address Not Specified'}
               </div>
             </div>

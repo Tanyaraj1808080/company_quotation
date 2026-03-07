@@ -6,6 +6,7 @@ const CreateQuotation = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     clientName: '',
+    clientAddress: '',
     quotationDate: '',
     itemDescription: '',
     itemQty: 1,
@@ -22,6 +23,7 @@ const CreateQuotation = () => {
     try {
       const payload = {
         clientName: formData.clientName,
+        clientAddress: formData.clientAddress,
         totalValue: parseFloat(formData.itemQty) * parseFloat(formData.itemPrice),
         currency: formData.currency,
         dateCreated: formData.quotationDate,
@@ -66,6 +68,12 @@ const CreateQuotation = () => {
               <div className="col-md-6 mb-3">
                 <label htmlFor="quotationDate" className="form-label">Date</label>
                 <input type="date" className="form-control" id="quotationDate" value={formData.quotationDate} onChange={handleChange} required />
+              </div>
+            </div>
+            <div className="row">
+              <div className="col-md-12 mb-3">
+                <label htmlFor="clientAddress" className="form-label">Client Address</label>
+                <textarea className="form-control" id="clientAddress" rows="3" placeholder="Enter full client address" value={formData.clientAddress} onChange={handleChange}></textarea>
               </div>
             </div>
             <hr />
