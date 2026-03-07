@@ -4,6 +4,11 @@ import '../../assets/styles/quotation-template.css';
 import mindManthanLogo from '../../MIND MANTHAN LOGO2.svg 2 .svg';
 
 const QuotationTemplates = () => {
+  const today = new Date().toISOString().split('T')[0];
+  const defaultDue = new Date();
+  defaultDue.setDate(defaultDue.getDate() + 30);
+  const formattedDue = defaultDue.toISOString().split('T')[0];
+
   const [templates, setTemplates] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showEditor, setShowEditor] = useState(false);
@@ -17,8 +22,8 @@ const QuotationTemplates = () => {
     clientName: '[CLIENT NAME]',
     clientAddress: '[ADDRESS]',
     quoteNo: '#212182818',
-    dueDate: '2023-05-05',
-    quoteDate: '2023-05-02',
+    dueDate: formattedDue,
+    quoteDate: today,
     logo: null, // Custom logo for this template
     items: [
       { id: 1, quantity: 1, description: '[WEBSITE]', price: '[****]', amount: '[****]' },
@@ -32,6 +37,7 @@ const QuotationTemplates = () => {
     subtotal: '[****]',
     discountRate: '0',
     discount: '0.00',
+    taxRate: '0',
     tax: '0.00',
     total: '[****]',
     paymentOptions: [
@@ -154,21 +160,23 @@ const QuotationTemplates = () => {
     }
   };
 
-  const calculateTotals = (items, discRate = templateData.discountRate, tx = templateData.tax) => {
+  const calculateTotals = (items, discRate = templateData.discountRate, tRate = templateData.taxRate) => {
     const subtotal = items.reduce((sum, item) => sum + (parseFloat(item.amount.toString().replace(/[^\d.]/g, '')) || 0), 0);
-    const rate = parseFloat(discRate.toString().replace(/[^\d.]/g, '')) || 0;
-    const t = parseFloat(tx.toString().replace(/[^\d.]/g, '')) || 0;
+    const dRate = parseFloat(discRate.toString().replace(/[^\d.]/g, '')) || 0;
+    const txRate = parseFloat(tRate.toString().replace(/[^\d.]/g, '')) || 0;
     
-    const discAmount = (subtotal * rate) / 100;
-    const total = subtotal - discAmount + t;
+    const discAmount = (subtotal * dRate) / 100;
+    const taxAmount = (subtotal * txRate) / 100;
+    const total = subtotal - discAmount + taxAmount;
     
     setTemplateData(prev => ({
       ...prev,
       items,
       subtotal: subtotal.toFixed(2),
-      discountRate: rate.toString(),
+      discountRate: dRate.toString(),
       discount: discAmount.toFixed(2),
-      tax: t.toFixed(2),
+      taxRate: txRate.toString(),
+      tax: taxAmount.toFixed(2),
       total: total.toFixed(2)
     }));
   };
@@ -183,11 +191,15 @@ const QuotationTemplates = () => {
       const cleaned = val.toString().replace(/[^\d.]/g, '');
       return parseFloat(cleaned) || 0;
     };
-
-    const payload = {
-      clientName: templateData.clientName.replace(/[\[\]_]/g, '').trim() || 'New Client',
-      clientAddress: templateData.clientAddress.replace(/[\[\]_]/g, '').trim() || '',
-      totalValue: cleanNum(templateData.total),
+const payload = {
+  clientName: templateData.clientName.replace(/[\[\]_]/g, '').trim() || 'New Client',
+  clientAddress: templateData.clientAddress.replace(/[\[\]_]/g, '').trim() || '',
+  totalValue: cleanNum(templateData.total),
+  discount: cleanNum(templateData.discount),
+  discountRate: cleanNum(templateData.discountRate),
+  tax: cleanNum(templateData.tax),
+  taxRate: cleanNum(templateData.taxRate),
+  currency: 'INR',
       discount: cleanNum(templateData.discount),
       tax: cleanNum(templateData.tax),
       currency: 'INR',
@@ -232,14 +244,16 @@ const QuotationTemplates = () => {
   const updateField = (field, value) => {
     setTemplateData(prev => {
       const newData = { ...prev, [field]: value };
-      if (field === 'discountRate' || field === 'tax' || field === 'subtotal') {
+      if (field === 'discountRate' || field === 'taxRate' || field === 'subtotal') {
         const subtotal = parseFloat(newData.subtotal.toString().replace(/[^\d.]/g, '')) || 0;
-        const rate = parseFloat(newData.discountRate.toString().replace(/[^\d.]/g, '')) || 0;
-        const tx = parseFloat(newData.tax.toString().replace(/[^\d.]/g, '')) || 0;
+        const dRate = parseFloat(newData.discountRate.toString().replace(/[^\d.]/g, '')) || 0;
+        const tRate = parseFloat(newData.taxRate.toString().replace(/[^\d.]/g, '')) || 0;
         
-        const discAmount = (subtotal * rate) / 100;
+        const discAmount = (subtotal * dRate) / 100;
+        const taxAmount = (subtotal * tRate) / 100;
         newData.discount = discAmount.toFixed(2);
-        newData.total = (subtotal - discAmount + tx).toFixed(2);
+        newData.tax = taxAmount.toFixed(2);
+        newData.total = (subtotal - discAmount + taxAmount).toFixed(2);
       }
       return newData;
     });
@@ -433,7 +447,7 @@ const QuotationTemplates = () => {
               </div>
               <div className="total-section">
                 <p>SUBTOTAL : <span>₹{templateData.subtotal}</span></p>
-                <p>TAX (+) : <span contentEditable suppressContentEditableWarning onBlur={(e) => updateField('tax', e.target.innerText)}>{templateData.tax}</span></p>
+                <p>TAX (<span contentEditable suppressContentEditableWarning onBlur={(e) => updateField('taxRate', e.target.innerText)}>{templateData.taxRate}</span>%) : <span>₹{templateData.tax}</span></p>
                 <p className="text-danger">DISCOUNT (<span contentEditable suppressContentEditableWarning onBlur={(e) => updateField('discountRate', e.target.innerText)}>{templateData.discountRate}</span>%) : <span>₹{templateData.discount}</span></p>
                 <hr />
                 <h3>TOTAL : <span>₹{templateData.total}</span></h3>

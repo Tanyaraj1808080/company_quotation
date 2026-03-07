@@ -51,6 +51,9 @@ const ViewQuotation = () => {
 
   const logoToUse = companySettings?.companyLogo || mindManthanLogo;
 
+  // Calculate subtotal for display
+  const subtotalValue = (parseFloat(quotation.totalValue) || 0) + (parseFloat(quotation.discount) || 0) - (parseFloat(quotation.tax) || 0);
+
   return (
     <div className="quotation-container">
       {/* Action Bar */}
@@ -79,7 +82,7 @@ const ViewQuotation = () => {
               <img 
                 src={logoToUse} 
                 alt="company logo" 
-                style={{ width: '140px', height: '140px', objectFit: 'contain' }} 
+                style={{ width: '100px', height: '100px', objectFit: 'contain' }} 
               />
             </div>
             <div className="invoice-title text-end">
@@ -146,27 +149,27 @@ const ViewQuotation = () => {
                 Thank you for your business with us!
               </div>
             </div>
-            <div className="total-section bg-light p-3 rounded">
-              <div className="d-flex justify-content-between mb-2">
+            <div className="total-section">
+              <p>
                 <span>SUBTOTAL :</span>
-                <span className="fw-bold">₹{((parseFloat(quotation.totalValue) || 0) + (parseFloat(quotation.discount) || 0) - (parseFloat(quotation.tax) || 0)).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-              </div>
+                <span className="value">₹{subtotalValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+              </p>
               {parseFloat(quotation.tax) > 0 && (
-                <div className="d-flex justify-content-between mb-2">
-                  <span>TAX (+) :</span>
-                  <span className="fw-bold">₹{parseFloat(quotation.tax).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                </div>
+                <p>
+                  <span>TAX {quotation.taxRate}% (+) :</span>
+                  <span className="value">₹{parseFloat(quotation.tax).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                </p>
               )}
               {parseFloat(quotation.discount) > 0 && (
-                <div className="d-flex justify-content-between mb-2 text-danger">
-                  <span>DISCOUNT (-) :</span>
-                  <span className="fw-bold">₹{parseFloat(quotation.discount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                </div>
+                <p className="text-danger">
+                  <span>DISCOUNT {quotation.discountRate}% (-) :</span>
+                  <span className="value">₹{parseFloat(quotation.discount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                </p>
               )}
-              <div className="d-flex justify-content-between align-items-center border-top pt-2">
-                <h3 className="mb-0 fw-bold" style={{ color: '#003366' }}>TOTAL :</h3>
-                <h3 className="mb-0 fw-bold" style={{ color: '#003366' }}>₹{parseFloat(quotation.totalValue).toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
-              </div>
+              <h3>
+                <span>TOTAL :</span>
+                <span className="value">₹{parseFloat(quotation.totalValue).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+              </h3>
             </div>
           </div>
           

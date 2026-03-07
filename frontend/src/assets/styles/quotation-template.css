@@ -116,7 +116,7 @@
     margin-top: 30px;
     display: flex;
     justify-content: space-between;
-    gap: 20px;
+    gap: 40px;
 }
 
 .terms-section {
@@ -125,13 +125,22 @@
 
 .total-section {
     width: 250px;
-    text-align: right;
+    display: flex;
+    flex-direction: column;
 }
 
 .total-section p {
     margin-bottom: 5px;
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    width: 100%;
+}
+
+.total-section .value {
+    font-weight: bold;
+    text-align: right;
 }
 
 .total-section h3 {
@@ -141,6 +150,10 @@
     margin-top: 10px;
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    width: 100%;
 }
 
 .quotation-footer {
@@ -153,15 +166,14 @@
 /* --- REFINED PRINT STYLES --- */
 @page {
     size: A4;
-    margin: 15mm 10mm; /* Default margin for all pages */
+    margin: 15mm 10mm; 
 }
 
 @page :first {
-    margin-top: 5mm; /* Reduced top margin for the first page only */
+    margin-top: 5mm; 
 }
 
 @media print {
-    /* Hide all UI elements aggressively */
     header, nav, .sidebar, .top-navbar, .no-print, .btn, .sidebar-backdrop, .no-print-area, 
     .card.no-print, .action-bar, [className*="no-print"] {
         display: none !important;
@@ -171,7 +183,6 @@
         padding: 0 !important;
     }
 
-    /* Reset global layout for print */
     html, body {
         width: 100% !important;
         height: auto !important;
@@ -202,16 +213,15 @@
     }
 
     .quotation-page {
-        width: 100% !important; /* Let @page margins handle side spacing */
+        width: 100% !important; 
         min-height: auto !important;
         margin: 0 !important;
-        padding: 0 !important; /* Using @page margins instead of internal padding */
+        padding: 0 !important; 
         box-shadow: none !important;
         border: none !important;
         display: block !important;
     }
 
-    /* Prevent elements from being cut in half across pages */
     .quotation-table tr, 
     .payment-section, 
     .bank-details-container, 
@@ -219,7 +229,6 @@
         page-break-inside: avoid !important;
     }
 
-    /* Force background colors and images */
     * {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;

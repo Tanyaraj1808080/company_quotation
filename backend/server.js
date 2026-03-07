@@ -190,7 +190,7 @@ app.get('/api/quotations/:id', async (req, res) => {
 
 app.post('/api/quotations', async (req, res) => {
     try {
-        let { clientName, clientAddress, totalValue, discount, tax, currency, items, dateCreated } = req.body;
+        let { clientName, clientAddress, totalValue, discount, discountRate, tax, taxRate, currency, items, dateCreated } = req.body;
         if (!clientName || totalValue === undefined) return res.status(400).json({ message: 'clientName and totalValue are required.' });
         
         const quotations = await Quotation.findAll({ attributes: ['id'] });
@@ -208,7 +208,9 @@ app.post('/api/quotations', async (req, res) => {
             id, clientName: String(clientName), clientAddress: clientAddress || null,
             totalValue: parseFloat(totalValue) || 0,
             discount: parseFloat(discount) || 0,
+            discountRate: parseFloat(discountRate) || 0,
             tax: parseFloat(tax) || 0,
+            taxRate: parseFloat(taxRate) || 0,
             currency: currency || 'INR',
             items: itemsStr, dateCreated: dateCreated || new Date().toISOString().split('T')[0], status: 'Pending'
         });
@@ -222,7 +224,15 @@ app.patch('/api/quotations/:id', async (req, res) => {
     try {
         const quotation = await Quotation.findByPk(req.params.id);
         if (quotation) {
-            await quotation.update(req.body);
+            let updateData = { ...req.body };
+            // Ensure numbers are parsed correctly if provided
+            if (updateData.totalValue !== undefined) updateData.totalValue = parseFloat(updateData.totalValue);
+            if (updateData.discount !== undefined) updateData.discount = parseFloat(updateData.discount);
+            if (updateData.discountRate !== undefined) updateData.discountRate = parseFloat(updateData.discountRate);
+            if (updateData.tax !== undefined) updateData.tax = parseFloat(updateData.tax);
+            if (updateData.taxRate !== undefined) updateData.taxRate = parseFloat(updateData.taxRate);
+            
+            await quotation.update(updateData);
             res.json(quotation);
         } else res.status(404).json({ message: 'Quotation not found' });
     } catch (error) {
