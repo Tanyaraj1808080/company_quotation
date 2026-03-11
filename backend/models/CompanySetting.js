@@ -12,22 +12,11 @@ const CompanySetting = sequelize.define('CompanySetting', {
         defaultValue: 'Mindmanthan Software Solutions'
     },
     companyAddress: {
-        type: DataTypes.TEXT,
-        defaultValue: 'A90, A BLOCK, SECTOR 4, NOIDA, UTTAR PRADESH 201301'
+        type: DataTypes.TEXT
     },
     companyLogo: {
-        type: DataTypes.TEXT('long'), // Base64 or URL
-        allowNull: true
+        type: DataTypes.LONGTEXT
     },
-    primaryColor: {
-        type: DataTypes.STRING,
-        defaultValue: '#0d6efd'
-    },
-    secondaryColor: {
-        type: DataTypes.STRING,
-        defaultValue: '#6c757d'
-    },
-    // General Settings
     timezone: {
         type: DataTypes.STRING,
         defaultValue: 'IST'
