@@ -23,7 +23,7 @@ const ApprovedQuotations = () => {
   const fetchQuotations = async () => {
     try {
       const response = await axios.get('/api/quotations');
-      setQuotations(response.data.filter(q => q.status === 'Approved'));
+      setQuotations(response.data.filter(q => q.status && q.status.toLowerCase() === 'approved'));
       setLoading(false);
     } catch (error) {
       console.error('Error fetching quotations:', error);
@@ -31,169 +31,104 @@ const ApprovedQuotations = () => {
     }
   };
 
-  const generateInvoice = async (quotation) => {
-    if (window.confirm(`Convert quotation ${quotation.id} to Invoice?`)) {
-      try {
-        const invoiceData = {
-          clientId: quotation.clientId || 1, // Defaulting if not present
-          clientName: quotation.clientName,
-          amount: quotation.totalValue,
-          issueDate: new Date().toISOString().split('T')[0],
-          dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days later
-          status: 'Pending'
-        };
-        await axios.post('/api/invoices', invoiceData);
-        alert(`Invoice generated successfully for ${quotation.clientName}!`);
-      } catch (error) {
-        console.error('Error generating invoice:', error);
-        alert('Failed to generate invoice. Please ensure backend endpoint /api/invoices exists.');
-      }
-    }
-  };
-
-  const downloadPDF = (id) => {
-    alert(`Downloading PDF for quotation ${id}...`);
-    // Placeholder for actual PDF generation logic
-  };
-
-  const emailClient = (clientName) => {
-    alert(`Opening email client to send quotation to ${clientName}...`);
-    // Placeholder for email trigger
-  };
+  const totalValue = quotations.reduce((acc, q) => acc + (parseFloat(q.totalValue) || 0), 0);
 
   const exportAllToCSV = () => {
     if (filteredQuotations.length === 0) return alert('No data to export');
-    
-    const headers = ['ID', 'Client', 'Value', 'Currency', 'Date Created', 'Status'];
+    const headers = ['ID', 'Client', 'Value', 'Date Created'];
     const csvRows = [
       headers.join(','),
-      ...filteredQuotations.map(q => [
-        q.id,
-        `"${q.clientName}"`,
-        q.totalValue,
-        q.currency || 'USD',
-        q.dateCreated,
-        q.status
-      ].join(','))
+      ...filteredQuotations.map(q => [q.id, `"${q.clientName}"`, q.totalValue, q.dateCreated].join(','))
     ];
-    
-    const csvContent = csvRows.join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `approved_quotations_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
+    link.href = url;
+    link.download = `approved_quotations.csv`;
     link.click();
-    document.body.removeChild(link);
   };
 
-  const totalValue = quotations.reduce((acc, q) => acc + q.totalValue, 0);
-
   return (
-    <div className="mt-4">
-      {/* KPI Cards */}
-      <div className="row mb-4">
-        <div className="col-md-4">
-          <div className="card shadow-sm border-0 bg-success text-white">
-            <div className="card-body py-4">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <h6 className="text-uppercase mb-2 opacity-75">Approved Quotes</h6>
-                  <h2 className="mb-0 fw-bold">{quotations.length}</h2>
-                </div>
-                <div className="fs-1 opacity-50">
-                  <i className="bi bi-check-circle"></i>
-                </div>
+    <div className="mt-4 fade-in">
+      {/* Responsive KPI Cards */}
+      <div className="row mb-4 g-3">
+        <div className="col-12 col-md-4">
+          <div className="card shadow-sm border-0 bg-success text-white h-100">
+            <div className="card-body py-4 d-flex justify-content-between align-items-center">
+              <div>
+                <h6 className="text-uppercase mb-1 opacity-75 small fw-bold">Approved Quotes</h6>
+                <h2 className="mb-0 fw-bold">{quotations.length}</h2>
               </div>
+              <i className="bi bi-check-circle fs-1 opacity-50"></i>
             </div>
           </div>
         </div>
-        <div className="col-md-4">
-          <div className="card shadow-sm border-0 bg-primary text-white">
-            <div className="card-body py-4">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <h6 className="text-uppercase mb-2 opacity-75">Total Value</h6>
-                  <h2 className="mb-0 fw-bold">
-                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(totalValue)}
-                  </h2>
-                </div>
-                <div className="fs-1 opacity-50">
-                  <i className="bi bi-wallet2"></i>
-                </div>
+        <div className="col-12 col-md-4">
+          <div className="card shadow-sm border-0 bg-primary text-white h-100">
+            <div className="card-body py-4 d-flex justify-content-between align-items-center">
+              <div>
+                <h6 className="text-uppercase mb-1 opacity-75 small fw-bold">Total Value</h6>
+                <h2 className="mb-0 fw-bold">₹{totalValue.toLocaleString()}</h2>
               </div>
+              <i className="bi bi-wallet2 fs-1 opacity-50"></i>
             </div>
           </div>
         </div>
-        <div className="col-md-4">
-          <div className="card shadow-sm border-0 bg-info text-white">
-            <div className="card-body py-4">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <h6 className="text-uppercase mb-2 opacity-75">Invoiced Rate</h6>
-                  <h2 className="mb-0 fw-bold">85%</h2>
-                </div>
-                <div className="fs-1 opacity-50">
-                  <i className="bi bi-receipt-cutoff"></i>
-                </div>
+        <div className="col-12 col-md-4">
+          <div className="card shadow-sm border-0 bg-info text-white h-100">
+            <div className="card-body py-4 d-flex justify-content-between align-items-center">
+              <div>
+                <h6 className="text-uppercase mb-1 opacity-75 small fw-bold">Invoiced Rate</h6>
+                <h2 className="mb-0 fw-bold">100%</h2>
               </div>
+              <i className="bi bi-receipt-cutoff fs-1 opacity-50"></i>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="card shadow-sm">
-        <div className="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-          <h5 className="mb-0">Approved Quotations</h5>
-          <div className="d-flex">
-            <div className="input-group input-group-sm me-2" style={{ width: '250px' }}>
+      <div className="card shadow-sm border-0 rounded-4">
+        <div className="card-header bg-white py-3 border-0 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+          <h5 className="mb-0 fw-bold">Approved Quotations</h5>
+          <div className="d-flex flex-column flex-sm-row gap-2 w-100 w-md-auto">
+            <div className="input-group input-group-sm">
               <span className="input-group-text bg-light border-end-0"><i className="bi bi-search"></i></span>
-              <input 
-                type="text" 
-                className="form-control border-start-0 ps-0" 
-                placeholder="Search Client or ID..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+              <input type="text" className="form-control border-start-0" placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
             </div>
-            <button className="btn btn-sm btn-outline-secondary" onClick={exportAllToCSV}>
+            <button className="btn btn-sm btn-outline-secondary text-nowrap" onClick={exportAllToCSV}>
               <i className="bi bi-download me-1"></i>Export All
             </button>
           </div>
         </div>
-        <div className="card-body">
+        <div className="card-body p-0">
           <div className="table-responsive">
-            <table className="table table-hover align-middle">
-              <thead className="table-light">
+            <table className="table table-hover align-middle mb-0">
+              <thead className="bg-light">
                 <tr>
-                  <th>ID</th>
+                  <th className="ps-4">ID</th>
                   <th>Client</th>
                   <th>Value</th>
-                  <th>Date Created</th>
+                  <th>Date</th>
                   <th>Status</th>
-                  <th>Actions</th>
+                  <th className="pe-4 text-end text-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan="6" className="text-center py-4">Loading...</td></tr>
+                  <tr><td colSpan="6" className="text-center py-5"><div className="spinner-border text-primary spinner-border-sm"></div></td></tr>
                 ) : filteredQuotations.length === 0 ? (
-                  <tr><td colSpan="6" className="text-center py-4">No approved quotations found.</td></tr>
+                  <tr><td colSpan="6" className="text-center py-5 text-muted">No approved quotations.</td></tr>
                 ) : (
                   filteredQuotations.map(q => (
                     <tr key={q.id}>
-                      <td>{q.id}</td>
-                      <td>{q.clientName}</td>
-                      <td>{new Intl.NumberFormat('en-US', { style: 'currency', currency: q.currency || 'USD' }).format(q.totalValue)}</td>
-                      <td>{q.dateCreated}</td>
-                      <td><span className="badge bg-success">Approved</span></td>
-                      <td>
+                      <td className="ps-4 fw-bold">{q.id}</td>
+                      <td className="fw-medium">{q.clientName}</td>
+                      <td className="fw-bold text-dark">₹{parseFloat(q.totalValue || 0).toLocaleString()}</td>
+                      <td className="small text-muted">{q.dateCreated}</td>
+                      <td><span className="badge bg-success-soft text-success rounded-pill">Approved</span></td>
+                      <td className="pe-4 text-end text-nowrap">
                         <button className="btn btn-sm btn-outline-info me-1" title="View"><i className="bi bi-eye"></i></button>
-                        <button className="btn btn-sm btn-outline-primary me-1" title="Generate Invoice" onClick={() => generateInvoice(q)}><i className="bi bi-receipt"></i></button>
-                        <button className="btn btn-sm btn-outline-secondary me-1" title="Download" onClick={() => downloadPDF(q.id)}><i className="bi bi-download"></i></button>
-                        <button className="btn btn-sm btn-outline-dark" title="Email Client" onClick={() => emailClient(q.clientName)}><i className="bi bi-envelope"></i></button>
+                        <button className="btn btn-sm btn-outline-primary" title="PDF"><i className="bi bi-file-pdf"></i></button>
                       </td>
                     </tr>
                   ))

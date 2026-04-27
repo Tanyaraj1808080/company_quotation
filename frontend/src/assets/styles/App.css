@@ -230,3 +230,30 @@ body, html {
 .animate-up {
     animation: slideInUp 0.5s ease-out forwards;
 }
+
+/* --- GLOBAL MOBILE FIXES --- */
+@media (max-width: 768px) {
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 15px;
+    }
+    
+    .card-header .btn, .card-header .d-flex {
+        width: 100%;
+    }
+
+    .btn-modern-secondary, .btn-primary {
+        width: 100%;
+        display: block;
+        margin-bottom: 5px;
+    }
+    
+    .table thead {
+        display: none; /* Hide headers on very small screens if we use card-view, but for now we keep scroll */
+    }
+    
+    .table-responsive {
+        border: none !important;
+    }
+}
