@@ -32,20 +32,16 @@ const Dashboard = () => {
   const [filteredQuotations, setFilteredQuotations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [kpis, setKpis] = useState([]);
+  
   const [chartStats, setChartStats] = useState({ labels: [], counts: [] });
+  const [donutStats, setDonutStats] = useState([0, 0, 0]); // Approved, Pending, Rejected
   
   // Single Filter State: can be 'range-6' or 'month-2026-3'
-  const [filterKey, setFilterKey] = useState('range-6');
+  const [filterKey, setFilterKey] = useState('range-12');
 
   useEffect(() => {
     fetchDashboardData();
   }, []);
-
-  useEffect(() => {
-    if (allQuotations.length > 0) {
-      applyFilters();
-    }
-  }, [filterKey, allQuotations]);
 
   const fetchDashboardData = async () => {
     try {
@@ -57,6 +53,12 @@ const Dashboard = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!loading) {
+      applyFilters();
+    }
+  }, [filterKey, allQuotations, loading]);
 
   const applyFilters = () => {
     let filtered = [];
@@ -79,10 +81,13 @@ const Dashboard = () => {
       startDate.setDate(1);
       startDate.setHours(0,0,0,0);
 
-      filtered = allQuotations.filter(q => new Date(q.dateCreated) >= startDate);
+      filtered = allQuotations.filter(q => {
+        const qDate = q.dateCreated ? new Date(q.dateCreated) : new Date();
+        return qDate >= startDate;
+      });
 
       filtered.forEach(q => {
-        const qDate = new Date(q.dateCreated);
+        const qDate = q.dateCreated ? new Date(q.dateCreated) : new Date();
         const match = periods.find(p => p.month === (qDate.getMonth() + 1) && p.year === qDate.getFullYear());
         if (match) match.count++;
       });
@@ -95,18 +100,27 @@ const Dashboard = () => {
       const month = parseInt(parts[2]);
 
       filtered = allQuotations.filter(q => {
-        const d = new Date(q.dateCreated);
+        const d = q.dateCreated ? new Date(q.dateCreated) : new Date();
         return (d.getMonth() + 1) === month && d.getFullYear() === year;
       });
 
       const daysInMonth = new Date(year, month, 0).getDate();
       for (let i = 1; i <= daysInMonth; i++) {
         labels.push(i.toString());
-        const dayCount = filtered.filter(q => new Date(q.dateCreated).getDate() === i).length;
+        const dayCount = filtered.filter(q => {
+           const d = q.dateCreated ? new Date(q.dateCreated) : new Date();
+           return d.getDate() === i;
+        }).length;
         counts.push(dayCount);
       }
     }
 
+    // Update Donut Stats
+    const approved = filtered.filter(q => q.status && q.status.toLowerCase() === 'approved').length;
+    const pending = filtered.filter(q => q.status && q.status.toLowerCase() === 'pending').length;
+    const rejected = filtered.filter(q => q.status && q.status.toLowerCase() === 'rejected').length;
+    
+    setDonutStats([approved, pending, rejected]);
     setFilteredQuotations(filtered);
     setChartStats({ labels, counts });
     updateKPIs(filtered);
@@ -114,9 +128,9 @@ const Dashboard = () => {
 
   const updateKPIs = (data) => {
     const total = data.length;
-    const approved = data.filter(q => q.status === 'Approved').length;
-    const pending = data.filter(q => q.status === 'Pending').length;
-    const rejected = data.filter(q => q.status === 'Rejected').length;
+    const approved = data.filter(q => q.status && q.status.toLowerCase() === 'approved').length;
+    const pending = data.filter(q => q.status && q.status.toLowerCase() === 'pending').length;
+    const rejected = data.filter(q => q.status && q.status.toLowerCase() === 'rejected').length;
     const totalValue = data.reduce((sum, q) => sum + parseFloat(q.totalValue || 0), 0);
     const approvalRate = total > 0 ? Math.round((approved / total) * 100) : 0;
 
@@ -149,11 +163,7 @@ const Dashboard = () => {
   const ratioData = {
     labels: ['Approved', 'Pending', 'Rejected'],
     datasets: [{
-      data: [
-        filteredQuotations.filter(q => q.status === 'Approved').length || 0,
-        filteredQuotations.filter(q => q.status === 'Pending').length || 0,
-        filteredQuotations.filter(q => q.status === 'Rejected').length || 0
-      ],
+      data: donutStats,
       backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
       borderWidth: 0,
       hoverOffset: 10
@@ -180,31 +190,7 @@ const Dashboard = () => {
     { title: 'Add Task', icon: 'bi-check2-square', path: '/tasks', color: 'warning' },
   ];
 
-  const handleExport = () => {
-    if (filteredQuotations.length === 0) {
-      alert("No data available to export");
-      return;
-    }
-    const headers = ["Quotation ID", "Client Name", "Total Value", "Status", "Date Created"];
-    const rows = filteredQuotations.map(q => [q.id, `"${q.clientName}"`, q.totalValue, q.status, q.dateCreated]);
-    const csvContent = [headers.join(","), ...rows.map(row => row.join(","))].join("\n");
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", `quotation_report.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   if (loading) return <div className="d-flex justify-content-center align-items-center" style={{height: '80vh'}}><div className="spinner-border text-primary"></div></div>;
-
-  const currentDate = new Date().toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric'
-  });
 
   return (
     <div className="fade-in animate-up">
@@ -213,17 +199,8 @@ const Dashboard = () => {
           <h2 className="fw-800 mb-1">Business Overview</h2>
           <p className="text-muted mb-0">Track your business performance and quotation pipeline in real-time.</p>
         </div>
-        <div className="d-flex gap-2">
-          <button className="btn btn-white border shadow-sm rounded-pill px-4">
-            <i className="bi bi-calendar3 me-2"></i> {currentDate}
-          </button>
-          <button className="btn btn-primary rounded-pill px-4 shadow" onClick={handleExport}>
-            <i className="bi bi-download me-2"></i> Export Report
-          </button>
-        </div>
       </div>
 
-      {/* KPI Cards */}
       <div className="row g-3 g-md-4 mb-5">
         {kpis.map((kpi, idx) => (
           <div className="col-12 col-sm-6 col-md-4 col-xl-2" key={idx}>
@@ -244,7 +221,6 @@ const Dashboard = () => {
       </div>
 
       <div className="row g-4 mb-5">
-        {/* Main Chart */}
         <div className="col-lg-8">
           <div className="card border-0 shadow-sm h-100 p-2">
             <div className="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
@@ -292,7 +268,6 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Donut Chart */}
         <div className="col-lg-4">
           <div className="card border-0 shadow-sm h-100 p-2">
             <div className="card-header bg-white py-3 border-0">
@@ -322,7 +297,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Quick Actions & Recent Activity */}
       <div className="row g-4">
         <div className="col-lg-4">
           <div className="card border-0 shadow-sm h-100 p-2">
@@ -349,8 +323,8 @@ const Dashboard = () => {
         <div className="col-lg-8">
           <div className="card border-0 shadow-sm h-100 p-2">
             <div className="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
-              <h5 className="fw-bold mb-0">Filtered Data List ({filteredQuotations.length})</h5>
-              <Link to="/all-quotations" className="text-primary small fw-bold text-decoration-none">View All Activity <i className="bi bi-arrow-right"></i></Link>
+              <h5 className="fw-bold mb-0">Filtered Activity ({filteredQuotations.length})</h5>
+              <Link to="/all-quotations" className="text-primary small fw-bold text-decoration-none">View All <i className="bi bi-arrow-right"></i></Link>
             </div>
             <div className="card-body p-0 overflow-hidden">
               <div className="table-responsive">
@@ -372,20 +346,14 @@ const Dashboard = () => {
                         </td>
                         <td className="fw-800">₹{parseFloat(q.totalValue).toLocaleString()}</td>
                         <td>
-                          <span className={`badge-modern ${
-                            q.status === 'Approved' ? 'bg-success-soft text-success' : 
-                            q.status === 'Pending' ? 'bg-warning-soft text-warning' : 
-                            'bg-danger-soft text-danger'
-                          }`}>
+                          <span className={`badge-modern ${q.status && q.status.toLowerCase() === 'approved' ? 'bg-success-soft text-success' : q.status && q.status.toLowerCase() === 'pending' ? 'bg-warning-soft text-warning' : 'bg-danger-soft text-danger'}`}>
                             {q.status}
                           </span>
                         </td>
                         <td className="pe-4 text-end text-muted small">{q.dateCreated}</td>
                       </tr>
                     ))}
-                    {filteredQuotations.length === 0 && (
-                      <tr><td colSpan="4" className="text-center py-4 text-muted">No quotations found for this period</td></tr>
-                    )}
+                    {filteredQuotations.length === 0 && <tr><td colSpan="4" className="text-center py-4 text-muted">No records in this period</td></tr>}
                   </tbody>
                 </table>
               </div>
@@ -396,8 +364,6 @@ const Dashboard = () => {
 
       <style dangerouslySetInnerHTML={{ __html: `
         .fw-800 { font-weight: 800; }
-        .btn-white { background: #fff; color: var(--text-muted); }
-        .hover-bg-white:hover { background-color: #fff !important; border-color: var(--primary-brand) !important; transform: scale(1.05); }
         .bg-success-soft { background-color: #dcfce7; }
         .bg-warning-soft { background-color: #fef3c7; }
         .bg-danger-soft { background-color: #fee2e2; }

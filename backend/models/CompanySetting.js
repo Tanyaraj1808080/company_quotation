@@ -15,7 +15,7 @@ const CompanySetting = sequelize.define('CompanySetting', {
         type: DataTypes.TEXT
     },
     companyLogo: {
-        type: DataTypes.LONGTEXT
+        type: DataTypes.TEXT('long')
     },
     timezone: {
         type: DataTypes.STRING,
